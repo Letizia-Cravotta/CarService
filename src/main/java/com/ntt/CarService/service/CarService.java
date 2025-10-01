@@ -1,4 +1,8 @@
 package com.ntt.CarService.service;
 
+import com.ntt.CarService.model.Car;
+import java.util.List;
+
 public interface CarService {
+    List<Car> getAllCars();
 }

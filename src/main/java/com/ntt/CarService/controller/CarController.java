@@ -1,7 +1,8 @@
-package controller;
+package com.ntt.CarService.controller;
 
 import com.ntt.CarService.model.Car;
 import com.ntt.CarService.repository.CarRepository;
+import com.ntt.CarService.service.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,11 +13,11 @@ import java.util.List;
 public class CarController {
 
     @Autowired
-    private CarRepository carRepository;
+    private CarService carService;
 
     @GetMapping("/car")
     public List<Car> getAllCars() {
-        return carRepository.cars;
+        return carService.getAllCars();
     }
 
 }
