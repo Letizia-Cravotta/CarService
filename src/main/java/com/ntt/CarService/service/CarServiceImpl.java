@@ -11,6 +11,7 @@ import java.util.List;
 public class CarServiceImpl implements CarService{
     @Autowired
     private CarRepository carRepository;
+    private Long nextId = 1L;
 
     @Override
     public List<Car> getAllCars() {
@@ -19,6 +20,17 @@ public class CarServiceImpl implements CarService{
 
     @Override
     public void createCar(Car car) {
+        car.setCarId(nextId++);
         carRepository.cars.add(car);
+    }
+
+    @Override
+    public Car getCarById(Long id) {
+        for (Car car : carRepository.cars) {
+            if (car.getCarId().equals(id)) {
+                return car;
+            }
+        }
+        return null;
     }
 }

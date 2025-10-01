@@ -6,4 +6,5 @@ import java.util.List;
 public interface CarService {
     List<Car> getAllCars();
     void createCar(Car car);
+    Car getCarById(Long id);
 }
