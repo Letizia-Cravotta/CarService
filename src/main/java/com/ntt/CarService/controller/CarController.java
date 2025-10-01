@@ -5,6 +5,8 @@ import com.ntt.CarService.repository.CarRepository;
 import com.ntt.CarService.service.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -18,6 +20,12 @@ public class CarController {
     @GetMapping("/car")
     public List<Car> getAllCars() {
         return carService.getAllCars();
+    }
+
+    @PostMapping("/car")
+    public String createCar(@RequestBody Car car) {
+        carService.createCar(car);
+        return "Car created successfully";
     }
 
 }
