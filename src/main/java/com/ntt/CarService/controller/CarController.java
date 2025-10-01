@@ -1,9 +1,9 @@
 package com.ntt.CarService.controller;
 
 import com.ntt.CarService.model.Car;
-import com.ntt.CarService.repository.CarRepository;
 import com.ntt.CarService.service.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,27 +20,32 @@ public class CarController {
     }
 
     @GetMapping("/car/{id}")
-    public Car getCarById(@PathVariable Long id) {
-        return carService.getCarById(id);
+    public ResponseEntity<?> getCarById(@PathVariable Long id) {
+        Car car = carService.getCarById(id);
+        if (car != null)
+            return ResponseEntity.ok(car);
+        return ResponseEntity.status(404).body("Car with ID " + id + " not found");
+
     }
 
     @PostMapping("/car")
-    public String createCar(@RequestBody Car car) {
+    public ResponseEntity<?> createCar(@RequestBody Car car) {
         carService.createCar(car);
-        return "Car created successfully";
+        return ResponseEntity.ok("Car created successfully");
     }
 
     @PutMapping("/car/{id}")
-    public String updateCar(@PathVariable Long id, @RequestBody Car updatedCar) {
+    public ResponseEntity<String> updateCar(@PathVariable Long id, @RequestBody Car updatedCar) {
         if (carService.updateCar(id, updatedCar))
-            return "Car updated successfully";
-        return "Car with id " + id + " not found";
+            return ResponseEntity.ok("Car updated successfully");
+        return ResponseEntity.ok("Car with ID " + id + " not found");
     }
 
     @DeleteMapping("/car/{id}")
-    public String deleteCar(@PathVariable Long id) {
+    public ResponseEntity<String> deleteCar(@PathVariable Long id) {
         if (carService.deleteCar(id))
-            return "Car deleted successfully";
-        return "Car with id " + id + " not found";
+            return ResponseEntity.ok("Car deleted successfully");
+        return ResponseEntity.ok("Car with ID " + id + " not found");
     }
+
 }
