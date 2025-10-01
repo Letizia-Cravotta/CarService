@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class CarServiceImpl implements CarService{
+public class CarServiceImpl implements CarService {
     @Autowired
     private CarRepository carRepository;
     private Long nextId = 1L;
@@ -41,6 +41,14 @@ public class CarServiceImpl implements CarService{
             existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
             existingCar.setColor(updatedCar.getColor());
             existingCar.setBrand(updatedCar.getBrand());
+        }
+    }
+
+    @Override
+    public void deleteCar(Long id) {
+        Car carToDelete = getCarById(id);
+        if (carToDelete != null) {
+            carRepository.cars.remove(carToDelete);
         }
     }
 }

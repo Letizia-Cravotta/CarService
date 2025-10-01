@@ -20,7 +20,7 @@ public class CarController {
     }
 
     @GetMapping("/car/{id}")
-    public Car getCarById(@PathVariable Long id){
+    public Car getCarById(@PathVariable Long id) {
         return carService.getCarById(id);
     }
 
@@ -34,5 +34,11 @@ public class CarController {
     public String updateCar(@PathVariable Long id, @RequestBody Car updatedCar) {
         carService.updateCar(id, updatedCar);
         return "Car updated successfully";
+    }
+
+    @DeleteMapping("/car/{id}")
+    public String deleteCar(@PathVariable Long id) {
+        carService.deleteCar(id);
+        return "Car deleted successfully";
     }
 }
