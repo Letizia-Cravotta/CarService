@@ -7,4 +7,5 @@ public interface CarService {
     List<Car> getAllCars();
     void createCar(Car car);
     Car getCarById(Long id);
+    void updateCar(Long id, Car updatedCar);
 }

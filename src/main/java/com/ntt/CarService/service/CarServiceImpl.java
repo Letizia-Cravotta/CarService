@@ -33,4 +33,14 @@ public class CarServiceImpl implements CarService{
         }
         return null;
     }
+
+    @Override
+    public void updateCar(Long id, Car updatedCar) {
+        Car existingCar = getCarById(id);
+        if (existingCar != null) {
+            existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
+            existingCar.setColor(updatedCar.getColor());
+            existingCar.setBrand(updatedCar.getBrand());
+        }
+    }
 }

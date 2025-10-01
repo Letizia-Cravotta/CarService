@@ -30,4 +30,9 @@ public class CarController {
         return "Car created successfully";
     }
 
+    @PutMapping("/car/{id}")
+    public String updateCar(@PathVariable Long id, @RequestBody Car updatedCar) {
+        carService.updateCar(id, updatedCar);
+        return "Car updated successfully";
+    }
 }
