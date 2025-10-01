@@ -32,13 +32,15 @@ public class CarController {
 
     @PutMapping("/car/{id}")
     public String updateCar(@PathVariable Long id, @RequestBody Car updatedCar) {
-        carService.updateCar(id, updatedCar);
-        return "Car updated successfully";
+        if (carService.updateCar(id, updatedCar))
+            return "Car updated successfully";
+        return "Car with id " + id + " not found";
     }
 
     @DeleteMapping("/car/{id}")
     public String deleteCar(@PathVariable Long id) {
-        carService.deleteCar(id);
-        return "Car deleted successfully";
+        if (carService.deleteCar(id))
+            return "Car deleted successfully";
+        return "Car with id " + id + " not found";
     }
 }

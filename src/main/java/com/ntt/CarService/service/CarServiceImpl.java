@@ -35,20 +35,24 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public void updateCar(Long id, Car updatedCar) {
+    public boolean updateCar(Long id, Car updatedCar) {
         Car existingCar = getCarById(id);
         if (existingCar != null) {
             existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
             existingCar.setColor(updatedCar.getColor());
             existingCar.setBrand(updatedCar.getBrand());
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void deleteCar(Long id) {
+    public boolean deleteCar(Long id) {
         Car carToDelete = getCarById(id);
         if (carToDelete != null) {
             carRepository.cars.remove(carToDelete);
+            return true;
         }
+        return false;
     }
 }
