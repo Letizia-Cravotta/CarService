@@ -3,11 +3,11 @@ package com.ntt.CarService;
 import com.ntt.CarService.controller.CarController;
 import com.ntt.CarService.model.Car;
 import com.ntt.CarService.service.CarService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
@@ -16,6 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class CarControllerTest {
 
     @Mock
@@ -24,15 +25,10 @@ class CarControllerTest {
     @InjectMocks
     private CarController carController;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
     void testGetAllCars() {
-        Car car1 = new Car(1L , 4, "Blue", "Ford");
-        Car car2 = new Car(2L , 2, "Red", "Chevrolet");
+        Car car1 = new Car(1L, 4, "Blue", "Ford");
+        Car car2 = new Car(2L, 2, "Red", "Chevrolet");
         when(carService.getAllCars()).thenReturn(Arrays.asList(car1, car2));
 
         List<Car> cars = carController.getAllCars();
@@ -42,7 +38,7 @@ class CarControllerTest {
 
     @Test
     void testGetCarById_Found() throws Exception {
-        Car car = new Car(1L , 4, "Black", "BMW");
+        Car car = new Car(1L, 4, "Black", "BMW");
         when(carService.getCarById(1L)).thenReturn(car);
 
         ResponseEntity<?> response = carController.getCarById(1L);
@@ -61,7 +57,7 @@ class CarControllerTest {
 
     @Test
     void testCreateCar() {
-        Car car = new Car(1L , 4, "White", "Audi");
+        Car car = new Car(1L, 4, "White", "Audi");
         ResponseEntity<?> response = carController.createCar(car);
         assertEquals(201, response.getStatusCodeValue());
         assertEquals("Car created successfully", response.getBody());
@@ -70,7 +66,7 @@ class CarControllerTest {
 
     @Test
     void testUpdateCar_Success() throws Exception {
-        Car updatedCar = new Car(1L , 4, "Silver", "Mercedes");
+        Car updatedCar = new Car(1L, 4, "Silver", "Mercedes");
         doNothing().when(carService).updateCar(1L, updatedCar);
 
         ResponseEntity<String> response = carController.updateCar(1L, updatedCar);
@@ -80,7 +76,7 @@ class CarControllerTest {
 
     @Test
     void testUpdateCar_NotFound() throws Exception {
-        Car updatedCar = new Car(1L , 4, "Silver", "Mercedes");
+        Car updatedCar = new Car(1L, 4, "Silver", "Mercedes");
         doThrow(new Exception("Car not found")).when(carService).updateCar(1L, updatedCar);
 
         ResponseEntity<String> response = carController.updateCar(1L, updatedCar);

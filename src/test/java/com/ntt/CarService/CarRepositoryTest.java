@@ -3,28 +3,22 @@ package com.ntt.CarService;
 
 import com.ntt.CarService.model.Car;
 import com.ntt.CarService.repository.CarRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for the CarRepository class.
  */
+@ExtendWith(MockitoExtension.class)
 class CarRepositoryTest {
 
+    @InjectMocks
     private CarRepository carRepository;
-
-    /**
-     * This method runs before each test. It ensures that we start
-     * with a fresh, empty repository for every test case, preventing
-     * tests from interfering with each other.
-     */
-    @BeforeEach
-    void setUp() {
-        carRepository = new CarRepository();
-    }
 
     @Test
     @DisplayName("Should add a car and assign a unique ID")
@@ -70,6 +64,28 @@ class CarRepositoryTest {
         // Assert: Should throw an exception
         assertThrows(Exception.class, () -> carRepository.getCarById(999L), "Expected an exception when retrieving a non-existent car ID.");
 
+    }
+
+    @Test
+    void testUpdateCar_Success() throws Exception {
+        Car existingCar = new Car(1L, 4, "Red", "Honda");
+        Car updatedCar = new Car(1L, 6, "Black", "BMW");
+
+        carRepository.addCar(existingCar);
+        carRepository.updateCar(1L, updatedCar);
+
+        assertEquals("Black", existingCar.getColor());
+        assertEquals("BMW", existingCar.getBrand());
+        assertEquals(6, existingCar.getNumberOfWheels());
+    }
+
+    @Test
+    void testUpdateCar_NotFound() throws Exception {
+        Car updatedCar = new Car(1L, 4, "Black", "BMW");
+
+        assertThrows(Exception.class, () -> {
+            carRepository.updateCar(1L, updatedCar);
+        });
     }
 
     @Test

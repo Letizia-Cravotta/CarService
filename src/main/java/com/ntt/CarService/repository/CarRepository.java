@@ -41,6 +41,20 @@ public class CarRepository {
     }
 
     /**
+     * Updates an existing car's details.
+     *
+     * @param id         The ID of the car to update.
+     * @param updatedCar The {@link Car} object containing updated details.
+     * @throws Exception if the car with the specified ID is not found.
+     */
+    public void updateCar(Long id, Car updatedCar) throws Exception {
+        Car existingCar = getCarById(id);
+        existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
+        existingCar.setColor(updatedCar.getColor());
+        existingCar.setBrand(updatedCar.getBrand());
+    }
+
+    /**
      * Deletes a car by its ID.
      *
      * @param id The ID of the car to delete.

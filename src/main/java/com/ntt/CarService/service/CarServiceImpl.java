@@ -55,10 +55,7 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public void updateCar(Long id, Car updatedCar) throws Exception {
-        Car existingCar = getCarById(id);
-        existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
-        existingCar.setColor(updatedCar.getColor());
-        existingCar.setBrand(updatedCar.getBrand());
+        carRepository.updateCar(id, updatedCar);
     }
 
     /**
