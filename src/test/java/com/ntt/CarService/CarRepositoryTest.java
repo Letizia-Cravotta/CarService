@@ -62,15 +62,13 @@ class CarRepositoryTest {
     }
 
     @Test
-    @DisplayName("Should return null when car ID does not exist")
-    void testGetCarById_whenCarDoesNotExist_shouldReturnNull() throws Exception {
+    @DisplayName("Should throw an exception when retrieving a non-existent car")
+    void testGetCarById_whenCarDoesNotExist_shouldThrowException() throws Exception {
         // Arrange: The repository is empty (thanks to @BeforeEach)
 
         // Act: Try to retrieve a car with an ID that doesn't exist
-        Car retrievedCar = carRepository.getCarById(999L);
-
-        // Assert: The result should be null
-        assertNull(retrievedCar, "Retrieved car should be null for a non-existent ID.");
+        // Assert: Should throw an exception
+        assertThrows(Exception.class, () -> carRepository.getCarById(999L), "Expected an exception when retrieving a non-existent car ID.");
 
     }
 
