@@ -9,7 +9,7 @@ public interface CarService {
 
     void createCar(Car car);
 
-    Car getCarById(Long id);
+    Car getCarById(Long id) throws Exception;
 
     void updateCar(Long id, Car updatedCar) throws Exception;
 

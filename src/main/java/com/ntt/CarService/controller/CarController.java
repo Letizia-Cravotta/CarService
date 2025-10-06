@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 /**
@@ -37,12 +36,13 @@ public class CarController {
      * or an error message if not found (HTTP 404 Not Found).
      */
     @GetMapping("/car/id/{id}")
-    public ResponseEntity<?> getCarById(@PathVariable Long id) {
-        Car car = carService.getCarById(id);
-        if (car != null)
+    public ResponseEntity<?> getCarById(@PathVariable Long id) throws Exception {
+        try {
+            Car car = carService.getCarById(id);
             return ResponseEntity.ok(car);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Car with ID " + id + " not found");
-
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     /**
@@ -87,10 +87,10 @@ public class CarController {
     public ResponseEntity<String> deleteCar(@PathVariable Long id) {
         try {
             carService.deleteCarById(id);
+            return ResponseEntity.ok("Car deleted successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
-        return ResponseEntity.ok("Car deleted successfully");
     }
 
 }

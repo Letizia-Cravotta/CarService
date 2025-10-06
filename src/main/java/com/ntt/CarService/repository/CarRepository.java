@@ -3,7 +3,6 @@ package com.ntt.CarService.repository;
 import com.ntt.CarService.model.Car;
 import lombok.Getter;
 import org.springframework.stereotype.Repository;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,13 +22,12 @@ public class CarRepository {
      * @param id The ID of the car to retrieve.
      * @return The {@link Car} object if found, otherwise null.
      */
-    public Car getCarById(Long id) {
-        for (Car car : cars) {
-            if (car.getCarId().equals(id)) {
-                return car;
-            }
-        }
-        return null;
+    public Car getCarById(Long id) throws Exception {
+        return cars.stream()
+                .filter(c -> c.getCarId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new Exception("Car with ID " + id + " not found"));
+
     }
 
     /**
@@ -50,9 +48,6 @@ public class CarRepository {
      */
     public void deleteCarById(long id) throws Exception {
         Car carToDelete = getCarById(id);
-        if (carToDelete == null) {
-            throw new Exception("Car with ID " + id + " not found");
-        }
         getCars().remove(carToDelete);
 
     }

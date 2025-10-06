@@ -4,7 +4,6 @@ import com.ntt.CarService.model.Car;
 import com.ntt.CarService.repository.CarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 /**
@@ -43,7 +42,7 @@ public class CarServiceImpl implements CarService {
      * @return The {@link Car} object if found, otherwise null.
      */
     @Override
-    public Car getCarById(Long id) {
+    public Car getCarById(Long id) throws Exception {
         return carRepository.getCarById(id);
     }
 
@@ -57,12 +56,9 @@ public class CarServiceImpl implements CarService {
     @Override
     public void updateCar(Long id, Car updatedCar) throws Exception {
         Car existingCar = getCarById(id);
-        if (existingCar != null) {
-            existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
-            existingCar.setColor(updatedCar.getColor());
-            existingCar.setBrand(updatedCar.getBrand());
-        }
-        throw new Exception("Car with ID " + id + " not found");
+        existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
+        existingCar.setColor(updatedCar.getColor());
+        existingCar.setBrand(updatedCar.getBrand());
     }
 
     /**
