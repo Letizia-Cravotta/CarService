@@ -3,6 +3,7 @@ package com.ntt.CarService;
 import com.ntt.CarService.controller.CarController;
 import com.ntt.CarService.model.Car;
 import com.ntt.CarService.service.CarService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +17,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the CarController class.
+ */
 @ExtendWith(MockitoExtension.class)
 class CarControllerTest {
 
@@ -26,6 +30,7 @@ class CarControllerTest {
     private CarController carController;
 
     @Test
+    @DisplayName("Should return all cars")
     void testGetAllCars() {
         Car car1 = new Car(1L, 4, "Blue", "Ford");
         Car car2 = new Car(2L, 2, "Red", "Chevrolet");
@@ -37,6 +42,17 @@ class CarControllerTest {
     }
 
     @Test
+    @DisplayName("Should return empty list when no cars are found")
+    void testGetAllCars_NotFound() {
+        when(carService.getAllCars()).thenReturn(List.of());
+
+        List<Car> cars = carController.getAllCars();
+        assertTrue(cars.isEmpty());
+        verify(carService, times(1)).getAllCars();
+    }
+
+    @Test
+    @DisplayName("Should return car by ID when found")
     void testGetCarById_Found() throws Exception {
         Car car = new Car(1L, 4, "Black", "BMW");
         when(carService.getCarById(1L)).thenReturn(car);
@@ -47,6 +63,7 @@ class CarControllerTest {
     }
 
     @Test
+    @DisplayName("Should return 404 when car by ID is not found")
     void testGetCarById_NotFound() throws Exception {
         when(carService.getCarById(1L)).thenThrow(new Exception("Car not found"));
 
@@ -56,6 +73,7 @@ class CarControllerTest {
     }
 
     @Test
+    @DisplayName("Should create a new car")
     void testCreateCar() {
         Car car = new Car(1L, 4, "White", "Audi");
         ResponseEntity<?> response = carController.createCar(car);
@@ -65,6 +83,7 @@ class CarControllerTest {
     }
 
     @Test
+    @DisplayName("Should update car when ID exists")
     void testUpdateCar_Success() throws Exception {
         Car updatedCar = new Car(1L, 4, "Silver", "Mercedes");
         doNothing().when(carService).updateCar(1L, updatedCar);
@@ -75,6 +94,7 @@ class CarControllerTest {
     }
 
     @Test
+    @DisplayName("Should return 404 when updating a non-existent car")
     void testUpdateCar_NotFound() throws Exception {
         Car updatedCar = new Car(1L, 4, "Silver", "Mercedes");
         doThrow(new Exception("Car not found")).when(carService).updateCar(1L, updatedCar);
@@ -85,6 +105,7 @@ class CarControllerTest {
     }
 
     @Test
+    @DisplayName("Should delete car when ID exists")
     void testDeleteCar_Success() throws Exception {
         doNothing().when(carService).deleteCarById(1L);
 
@@ -94,6 +115,7 @@ class CarControllerTest {
     }
 
     @Test
+    @DisplayName("Should return 404 when deleting a non-existent car")
     void testDeleteCar_NotFound() throws Exception {
         doThrow(new Exception("Car not found")).when(carService).deleteCarById(1L);
 

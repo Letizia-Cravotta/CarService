@@ -23,14 +23,11 @@ class CarRepositoryTest {
     @Test
     @DisplayName("Should add a car and assign a unique ID")
     void testAddCar() {
-        // Arrange: Create a new car without an ID
         Car newCar = new Car(null, 4, "Green", "Toyota");
         assertEquals(0, carRepository.getCars().size(), "Repository should be empty initially.");
 
-        // Act: Add the car to the repository
         carRepository.addCar(newCar);
 
-        // Assert: Verify the car was added and an ID was assigned
         assertEquals(1, carRepository.getCars().size(), "Repository should contain one car after adding.");
         assertNotNull(newCar.getCarId(), "Car ID should not be null after being added.");
         assertEquals(1L, newCar.getCarId(), "The first car added should have an ID of 1.");
@@ -38,15 +35,12 @@ class CarRepositoryTest {
 
     @Test
     @DisplayName("Should return the correct car when ID exists")
-    void testGetCarById() throws Exception {
-        // Arrange: Add a car to the repository first
+    void testGetCarById_whenCarExists() throws Exception {
         Car newCar = new Car(null, 4, "Red", "Honda");
         carRepository.addCar(newCar);
 
-        // Act: Try to retrieve the car using its assigned ID
         Car retrievedCar = carRepository.getCarById(1L);
 
-        // Assert: Check that the correct car was returned
         assertNotNull(retrievedCar, "Retrieved car should not be null.");
         assertEquals(1L, retrievedCar.getCarId(), "The car ID should match.");
         assertEquals(newCar.getColor(), retrievedCar.getColor(), "The colors should match.");
@@ -58,15 +52,11 @@ class CarRepositoryTest {
     @Test
     @DisplayName("Should throw an exception when retrieving a non-existent car")
     void testGetCarById_whenCarDoesNotExist_shouldThrowException() throws Exception {
-        // Arrange: The repository is empty (thanks to @BeforeEach)
-
-        // Act: Try to retrieve a car with an ID that doesn't exist
-        // Assert: Should throw an exception
         assertThrows(Exception.class, () -> carRepository.getCarById(999L), "Expected an exception when retrieving a non-existent car ID.");
-
     }
 
     @Test
+    @DisplayName("Should successfully update a car when ID exists")
     void testUpdateCar_Success() throws Exception {
         Car existingCar = new Car(1L, 4, "Red", "Honda");
         Car updatedCar = new Car(1L, 6, "Black", "BMW");
@@ -80,6 +70,7 @@ class CarRepositoryTest {
     }
 
     @Test
+    @DisplayName("Should throw an exception when updating a non-existent car")
     void testUpdateCar_NotFound() throws Exception {
         Car updatedCar = new Car(1L, 4, "Black", "BMW");
 
@@ -91,14 +82,11 @@ class CarRepositoryTest {
     @Test
     @DisplayName("Should successfully delete a car when ID exists")
     void testDeleteCarById_whenCarExists_shouldRemoveCar() throws Exception {
-        // Arrange: Add a car to the repository
         Car newCar = new Car(null, 4, "Blue", "Ford");
         carRepository.addCar(newCar);
 
-        // Act: Delete the car
         carRepository.deleteCarById(1L);
 
-        // Assert: The car should no longer be in the repository
         assertEquals(0, carRepository.getCars().size(), "Repository should be empty after deletion.");
         assertThrows(Exception.class, () -> carRepository.getCarById(1L));
     }
@@ -106,14 +94,11 @@ class CarRepositoryTest {
     @Test
     @DisplayName("Should throw an exception when deleting a non-existent car")
     void testDeleteCarById_whenCarDoesNotExist_shouldThrowException() {
-        // Arrange: The repository is empty.
 
-        // Act & Assert: Verify that calling deleteCarById throws the expected exception
         Exception exception = assertThrows(Exception.class, () -> {
             carRepository.deleteCarById(99L);
         });
 
-        // Optionally, you can also check the exception message
         String expectedMessage = "Car with ID 99 not found";
         String actualMessage = exception.getMessage();
         assertTrue(actualMessage.contains(expectedMessage), "The exception message is not as expected.");
