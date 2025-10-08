@@ -22,7 +22,7 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public List<Car> getAllCars() {
-        return carRepository.getCars();
+        return carRepository.findAll();
     }
 
     /**
@@ -32,7 +32,7 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public void createCar(Car car) {
-        carRepository.addCar(car);
+        carRepository.save(car);
     }
 
     /**
@@ -43,7 +43,8 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public Car getCarById(Long id) throws Exception {
-        return carRepository.getCarById(id);
+        return carRepository.findById(id)
+                .orElseThrow(() -> new Exception("Car with ID " + id + " not found"));
     }
 
     /**
@@ -55,7 +56,11 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public void updateCar(Long id, Car updatedCar) throws Exception {
-        carRepository.updateCar(id, updatedCar);
+        Car existingCar = getCarById(id);
+        existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
+        existingCar.setColor(updatedCar.getColor());
+        existingCar.setBrand(updatedCar.getBrand());
+        carRepository.save(existingCar);
     }
 
     /**
@@ -66,6 +71,8 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public void deleteCarById(Long id) throws Exception {
-        carRepository.deleteCarById(id);
+        if(!carRepository.existsById(id))
+            throw new Exception("Car with ID " + id + " not found");
+        carRepository.deleteById(id);
     }
 }
