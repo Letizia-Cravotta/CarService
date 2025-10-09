@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -32,9 +33,8 @@ public class CarServiceTest {
     void testGetAllCars() {
         Car car1 = new Car(1L, 4, "Green", "Toyota");
         Car car2 = new Car(2L, 4, "Red", "Honda");
-        List<Car> expectedCars = List.of(car1, car2);
 
-        when(carRepository.getCars()).thenReturn(expectedCars);
+        when(carRepository.findAll()).thenReturn(List.of(car1, car2));
 
         List<Car> actualCars = carService.getAllCars();
 
@@ -46,7 +46,7 @@ public class CarServiceTest {
     @Test
     @DisplayName("Should return empty list when no cars are found")
     void testGetAllCars_Empty() {
-        when(carRepository.getCars()).thenReturn(List.of());
+        when(carRepository.findAll()).thenReturn(List.of());
 
         List<Car> actualCars = carService.getAllCars();
 
@@ -58,8 +58,7 @@ public class CarServiceTest {
     @DisplayName("Should return car by ID when found")
     void testGetCarById_Found() throws Exception {
         Car car = new Car(1L, 4, "Blue", "Ford");
-        when(carRepository.getCarById(1L)).thenReturn(car);
-
+        when(carRepository.findById(1L)).thenReturn(Optional.of(car));
         Car result = carService.getCarById(1L);
 
         assertNotNull(result);
@@ -69,7 +68,7 @@ public class CarServiceTest {
     @Test
     @DisplayName("Should throw exception when car by ID is not found")
     void testGetCarById_NotFound() throws Exception {
-        when(carRepository.getCarById(1L)).thenThrow(new Exception("Car with ID 1 not found"));
+        when(carRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(Exception.class, () -> carService.getCarById(1L));
     }
@@ -78,48 +77,59 @@ public class CarServiceTest {
     @DisplayName("Should create a new car")
     void testCreateCar() {
         Car car = new Car(null, 2, "Yellow", "Fiat");
-        doNothing().when(carRepository).addCar(car);
+        when(carRepository.save(car)).thenReturn(car);
+
 
         carService.createCar(car);
 
-        verify(carRepository, times(1)).addCar(car);
+        verify(carRepository, times(1)).save(car);
     }
 
     @Test
     @DisplayName("Should update car when ID exists")
     void testUpdateCar_Success() throws Exception {
-        Car updatedCar = new Car(1L, 4, "Black", "BMW");
-        doNothing().when(carRepository).updateCar(1L, updatedCar);
+        Long carId = 1L;
+        Car existingCar = new Car(carId, 4, "Red", "Toyota");
+        Car updatedCar = new Car(carId, 2, "Blue", "Honda");
 
-        carService.updateCar(1L, updatedCar);
+        when(carRepository.findById(carId)).thenReturn(Optional.of(existingCar));
+        when(carRepository.save(any(Car.class))).thenReturn(existingCar);
 
-        verify(carRepository, times(1)).updateCar(1L, updatedCar);
+        carService.updateCar(carId, updatedCar);
+
+        assertEquals(2, existingCar.getNumberOfWheels());
+        assertEquals("Blue", existingCar.getColor());
+        assertEquals("Honda", existingCar.getBrand());
+        verify(carRepository, times(1)).save(existingCar);
     }
 
     @Test
-    @DisplayName("Should throw exception when updating a non-existent car")
-    void testUpdateCar_NotFound() throws Exception {
-        Car updatedCar = new Car(1L, 4, "Black", "BMW");
-        doThrow(new Exception("Car with ID 1 not found")).when(carRepository).updateCar(1L, updatedCar);
+    @DisplayName("Should throw exception when car ID does not exist")
+    void testUpdateCar_NotFound() {
+        Long carId = 1L;
+        Car updatedCar = new Car(carId, 2, "Blue", "Honda");
 
-        Exception exception = assertThrows(Exception.class, () -> carService.updateCar(1L, updatedCar));
-        assertEquals("Car with ID 1 not found", exception.getMessage());
+        when(carRepository.findById(carId)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(Exception.class, () -> carService.updateCar(carId, updatedCar));
+        assertTrue(exception.getMessage().contains("not found"));
+        verify(carRepository, never()).save(any(Car.class));
     }
 
     @Test
     @DisplayName("Should delete car when ID exists")
     void testDeleteCarById_Success() throws Exception {
-        doNothing().when(carRepository).deleteCarById(1L);
+        when(carRepository.existsById(1L)).thenReturn(true);
 
         carService.deleteCarById(1L);
 
-        verify(carRepository, times(1)).deleteCarById(1L);
+        verify(carRepository, times(1)).deleteById(1L);
     }
 
     @Test
     @DisplayName("Should throw exception when deleting a non-existent car")
     void testDeleteCarById_NotFound() throws Exception {
-        doThrow(new Exception("Car with ID 1 not found")).when(carRepository).deleteCarById(1L);
+        when(carRepository.existsById(1L)).thenReturn(false);
 
         Exception exception = assertThrows(Exception.class, () -> carService.deleteCarById(1L));
         assertEquals("Car with ID 1 not found", exception.getMessage());
