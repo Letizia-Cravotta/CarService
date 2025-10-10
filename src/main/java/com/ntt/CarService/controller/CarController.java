@@ -2,6 +2,7 @@ package com.ntt.CarService.controller;
 
 import com.ntt.CarService.model.Car;
 import com.ntt.CarService.service.CarService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,7 +57,7 @@ public class CarController {
      * @return A {@link ResponseEntity} with a success message and HTTP status 201 Created.
      */
     @PostMapping("/car")
-    public ResponseEntity<?> createCar(@RequestBody Car car) {
+    public ResponseEntity<?> createCar(@Valid @RequestBody Car car) {
         log.info("POST /car - Creating a new car");
         carService.createCar(car);
         return ResponseEntity.status(HttpStatus.CREATED).body("Car created successfully");
@@ -71,7 +72,7 @@ public class CarController {
      * or an error message if the car to update is not found (HTTP 404 Not Found).
      */
     @PutMapping("/car/id/{id}")
-    public ResponseEntity<String> updateCar(@PathVariable Long id, @RequestBody Car updatedCar) {
+    public ResponseEntity<String> updateCar(@PathVariable Long id, @Valid @RequestBody Car updatedCar) {
         log.info("PUT /car/id/{} - Updating car", id);
         try {
             carService.updateCar(id, updatedCar);
