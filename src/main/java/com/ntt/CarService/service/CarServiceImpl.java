@@ -24,7 +24,6 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public List<Car> getAllCars() {
-        log.info("Retrieving all cars from the database");
         return carRepository.findAll();
     }
 
@@ -35,7 +34,6 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public void createCar(Car car) {
-        log.info("Attempting to create a new car: {}", car);
         carRepository.save(car);
         log.info("Car created successfully with ID: {}", car.getCarId());
     }
@@ -48,7 +46,6 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public Car getCarById(Long id) throws Exception {
-        log.info("Attempting to retrieve car with ID: {}", id);
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Car with ID {} not found", id);
@@ -67,7 +64,6 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public void updateCar(Long id, Car updatedCar) throws Exception {
-        log.info("Attempting to update car with ID: {} and updatedCar: {}", id, updatedCar);
         Car existingCar = getCarById(id);
         existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
         existingCar.setColor(updatedCar.getColor());
@@ -84,7 +80,6 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public void deleteCarById(Long id) throws Exception {
-        log.info("Attempting to delete car with ID: {}", id);
         if(!carRepository.existsById(id)) {
             log.warn("Car with ID {} not found for deletion", id);
             throw new Exception("Car with ID " + id + " not found");
