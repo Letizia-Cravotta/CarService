@@ -2,6 +2,7 @@ package com.ntt.CarService.controller;
 
 import com.ntt.CarService.model.Car;
 import com.ntt.CarService.service.CarService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.List;
  * Provides endpoints for creating, retrieving, updating, and deleting cars.
  */
 @RestController
+@Slf4j
 public class CarController {
 
     @Autowired
@@ -25,6 +27,7 @@ public class CarController {
      */
     @GetMapping("/car")
     public List<Car> getAllCars() {
+        log.info("GET /car - Retrieving all cars");
         return carService.getAllCars();
     }
 
@@ -37,6 +40,7 @@ public class CarController {
      */
     @GetMapping("/car/id/{id}")
     public ResponseEntity<?> getCarById(@PathVariable Long id) throws Exception {
+        log.info("GET /car/id/{} - Retrieving car by ID", id);
         try {
             Car car = carService.getCarById(id);
             return ResponseEntity.ok(car);
@@ -53,6 +57,7 @@ public class CarController {
      */
     @PostMapping("/car")
     public ResponseEntity<?> createCar(@RequestBody Car car) {
+        log.info("POST /car - Creating a new car");
         carService.createCar(car);
         return ResponseEntity.status(HttpStatus.CREATED).body("Car created successfully");
     }
@@ -67,6 +72,7 @@ public class CarController {
      */
     @PutMapping("/car/id/{id}")
     public ResponseEntity<String> updateCar(@PathVariable Long id, @RequestBody Car updatedCar) {
+        log.info("PUT /car/id/{} - Updating car", id);
         try {
             carService.updateCar(id, updatedCar);
             return ResponseEntity.ok("Car updated successfully");
@@ -85,6 +91,7 @@ public class CarController {
      */
     @DeleteMapping("/car/id/{id}")
     public ResponseEntity<String> deleteCar(@PathVariable Long id) {
+        log.info("DELETE /car/id/{} - Deleting car", id);
         try {
             carService.deleteCarById(id);
             return ResponseEntity.ok("Car deleted successfully");

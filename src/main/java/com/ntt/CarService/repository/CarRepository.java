@@ -8,8 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Repository for managing {@link Car} entities in an in-memory list.
- * This class handles the storage, retrieval, and deletion of cars.
+ * Repository interface for managing {@link Car} entities.
+ * Extends the {@link JpaRepository} to provide CRUD operations and query methods.
+ * This interface interacts with the database for storing, retrieving, updating, and deleting cars.
  */
 @Repository
 public interface CarRepository extends JpaRepository<Car, Long> {
