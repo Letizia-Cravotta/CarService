@@ -17,8 +17,6 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long carId;
 
-    @Min(value = 3, message = "Number of wheels must be at least 3")
-    @Max(value = 6, message = "Number of wheels must be at most 6")
 
     private int numberOfWheels;
 
@@ -31,4 +29,8 @@ public class Car {
     private String brand;
 
 
+    @AssertTrue(message = "Number of wheels must be 3, 4, or 6")
+    public boolean isValidNumberOfWheels() {
+        return numberOfWheels == 3 || numberOfWheels == 4 || numberOfWheels == 6;
+    }
 }
