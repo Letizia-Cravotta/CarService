@@ -74,7 +74,7 @@ public class CarServiceTest {
 
     @Test
     @DisplayName("Should create a new car")
-    void testCreateCar() {
+    void testCreateCar_Success() {
         Car car = new Car(null, 2, "Yellow", "Fiat");
         when(carRepository.save(car)).thenReturn(car);
 
