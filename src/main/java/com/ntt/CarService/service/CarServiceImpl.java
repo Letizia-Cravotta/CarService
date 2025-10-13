@@ -1,10 +1,13 @@
 package com.ntt.CarService.service;
 
+import com.ntt.CarService.exceptions.APIException;
+import com.ntt.CarService.exceptions.ResourceNotFoundException;
 import com.ntt.CarService.model.Car;
 import com.ntt.CarService.repository.CarRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 /**
@@ -24,7 +27,11 @@ public class CarServiceImpl implements CarService {
      */
     @Override
     public List<Car> getAllCars() {
-        return carRepository.findAll();
+        List<Car> cars = carRepository.findAll();
+        if (cars.isEmpty()) {
+            throw new APIException("No cars found");
+        }
+        return cars;
     }
 
     /**
@@ -45,13 +52,13 @@ public class CarServiceImpl implements CarService {
      * @return The {@link Car} object if found, otherwise null.
      */
     @Override
-    public Car getCarById(Long id) throws Exception {
+    public Car getCarById(Long id) {
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Car with ID {} not found", id);
-                    return new Exception("Car with ID " + id + " not found");
+                    return new ResourceNotFoundException("Car", "carId", id);
                 });
-        log.info("Car with ID {} retrieved successfully: {}", id, car);
+        log.info("Car with ID {} retrieved successfully", id);
         return car;
     }
 
@@ -63,7 +70,7 @@ public class CarServiceImpl implements CarService {
      * @throws Exception if the car with the specified ID is not found.
      */
     @Override
-    public void updateCar(Long id, Car updatedCar) throws Exception {
+    public void updateCar(Long id, Car updatedCar) {
         Car existingCar = getCarById(id);
         existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
         existingCar.setColor(updatedCar.getColor());
@@ -79,10 +86,10 @@ public class CarServiceImpl implements CarService {
      * @throws Exception if the car with the specified ID is not found.
      */
     @Override
-    public void deleteCarById(Long id) throws Exception {
-        if(!carRepository.existsById(id)) {
+    public void deleteCarById(Long id) {
+        if (!carRepository.existsById(id)) {
             log.warn("Car with ID {} not found for deletion", id);
-            throw new Exception("Car with ID " + id + " not found");
+            throw new ResourceNotFoundException("Car", "carId", id);
         }
         carRepository.deleteById(id);
         log.info("Car with ID {} deleted successfully", id);
