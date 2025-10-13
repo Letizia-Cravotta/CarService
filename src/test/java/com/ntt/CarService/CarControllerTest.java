@@ -12,6 +12,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -86,45 +90,45 @@ class CarControllerTest {
     @Test
     @DisplayName("Should return 400 bad request when creating a car with invalid number of wheels")
     void testCreateCar_InvalidInputNumberOfWheels() throws Exception {
-        MockMvc mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(carController).build();
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
         Car invalidCar = new Car(null, -4, "green", "Toyota"); // Invalid number of wheels
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/car")
+                        MockMvcRequestBuilders.post("/car")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
     @DisplayName("Should return 400 bad request when creating a car with invalid color")
     void testCreateCar_InvalidInputColor() throws Exception {
-        MockMvc mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(carController).build();
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
         Car invalidCar = new Car(null, 4, "dosrje49!", "Toyota"); // Invalid color
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/car")
+                        MockMvcRequestBuilders.post("/car")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
     @Test
     @DisplayName("Should return 400 bad request when creating a car with invalid brand name")
     void testCreateCar_InvalidInputBrand() throws Exception {
-        MockMvc mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(carController).build();
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
         Car invalidCar = new Car(null, 4, "green", "Toyota!"); // Invalid brand name
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/car")
+                        MockMvcRequestBuilders.post("/car")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
@@ -152,41 +156,42 @@ class CarControllerTest {
     @Test
     @DisplayName("Should return 400 bad request when updating a car with invalid number of wheels")
     void testUpdateCar_InvalidInputNumberOfWheels() throws Exception {
-        MockMvc mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(carController).build();
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
         Car invalidCar = new Car(null, -4, "green", "Toyota"); // Invalid number of wheels
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/car/id/1")
+                        MockMvcRequestBuilders.put("/car/id/1")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
+
     @Test
     @DisplayName("Should return 400 bad request when updating a car with invalid color")
     void testUpdateCar_InvalidInputColor() throws Exception {
-        MockMvc mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(carController).build();
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
         Car invalidCar = new Car(null, 4, "dosrje49!", "Toyota"); // Invalid color
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/car/id/1")
+                        MockMvcRequestBuilders.put("/car/id/1")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
     @Test
     @DisplayName("Should return 400 bad request when updating a car with invalid number of wheels")
     void testUpdateCar_InvalidInputBrand() throws Exception {
-        MockMvc mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(carController).build();
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
         Car invalidCar = new Car(null, 4, "green", "Toyota!"); // Invalid brand name
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/car/id/1")
+                        MockMvcRequestBuilders.put("/car/id/1")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
