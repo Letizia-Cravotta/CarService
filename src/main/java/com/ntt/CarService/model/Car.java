@@ -31,6 +31,6 @@ public class Car {
 
     @AssertTrue(message = "Number of wheels must be 3, 4, or 6")
     public boolean isValidNumberOfWheels() {
-        return numberOfWheels == 3 || numberOfWheels == 4 || numberOfWheels == 6;
+        return numberOfWheels == 3 || numberOfWheels == 4 || numberOfWheels == 6 || numberOfWheels == 8;
     }
 }
