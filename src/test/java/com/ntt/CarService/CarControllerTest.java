@@ -7,6 +7,8 @@ import com.ntt.CarService.service.CarService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import com.ntt.CarService.exceptions.APIException;
 
 
 import java.util.Arrays;
@@ -48,12 +51,15 @@ class CarControllerTest {
     }
 
     @Test
-    @DisplayName("Should return empty list when no cars are found")
+    @DisplayName("Should throw APIException when no cars found")
     void testGetAllCars_NotFound() {
-        when(carService.getAllCars()).thenReturn(List.of());
+        when(carService.getAllCars()).thenThrow(new APIException("No cars found"));
 
-        List<Car> cars = carController.getAllCars();
-        assertTrue(cars.isEmpty());
+        APIException exception = assertThrows(
+                APIException.class,
+                () -> carController.getAllCars()
+        );
+        assertEquals("No cars found", exception.getMessage());
         verify(carService, times(1)).getAllCars();
     }
 
@@ -87,11 +93,28 @@ class CarControllerTest {
         assertEquals("Car created successfully", response.getBody());
         verify(carService, times(1)).createCar(car);
     }
-    @Test
+
+    @ParameterizedTest
+    @ValueSource(ints = {3, 4, 6, 8})
+    @DisplayName("Should create a new car with valid number of wheels")
+    void testCreateCar_ValidInputNumberOfWheels(int numberOfWheels) throws Exception {
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
+        Car validCar = new Car(null, numberOfWheels, "green", "Toyota"); // Valid number of wheels
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/car")
+                                .contentType("application/json")
+                                .content(objectMapper.writeValueAsString(validCar))
+                )
+                .andExpect(MockMvcResultMatchers.status().isCreated());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-4, 0, 1, 2, 5, 7, 9, Integer.MAX_VALUE})
     @DisplayName("Should return 400 bad request when creating a car with invalid number of wheels")
-    void testCreateCar_InvalidInputNumberOfWheels() throws Exception {
+    void testCreateCar_InvalidInputNumberOfWheels(int numberOfWheels) throws Exception {
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
-        Car invalidCar = new Car(null, -4, "green", "Toyota"); // Invalid number of wheels
+        Car invalidCar = new Car(null, numberOfWheels, "green", "Toyota"); // Invalid number of wheels
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(
@@ -102,11 +125,27 @@ class CarControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings = {"Green", "Red", "Blue", "Black", "White", "Silver", "Yellow"})
+    @DisplayName("Should create a new car with valid color")
+    void testCreateCar_ValidInputColor(String color) throws Exception {
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
+        Car validCar = new Car(null, 4, color, "Toyota"); // Valid color
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/car")
+                                .contentType("application/json")
+                                .content(objectMapper.writeValueAsString(validCar))
+                )
+                .andExpect(MockMvcResultMatchers.status().isCreated());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "       ", "1234", "red123", "blue!", "@green", "white$", "black%", "g-r-e-e-n"})
     @DisplayName("Should return 400 bad request when creating a car with invalid color")
-    void testCreateCar_InvalidInputColor() throws Exception {
+    void testCreateCar_InvalidInputColor(String color) throws Exception {
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
-        Car invalidCar = new Car(null, 4, "dosrje49!", "Toyota"); // Invalid color
+        Car invalidCar = new Car(null, 4, color, "Toyota"); // Invalid color
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(
@@ -116,11 +155,28 @@ class CarControllerTest {
                 )
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
-    @Test
-    @DisplayName("Should return 400 bad request when creating a car with invalid brand name")
-    void testCreateCar_InvalidInputBrand() throws Exception {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Toyota", "Chevrolet", "Ford", "Nissan", "Mazda", "Mercedes-Benz", "Land Rover"})
+    @DisplayName("Should create a new car with valid brand name")
+    void testCreateCar_ValidInputBrand(String brandName) throws Exception {
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
-        Car invalidCar = new Car(null, 4, "green", "Toyota!"); // Invalid brand name
+        Car validCar = new Car(null, 4, "green", brandName); // Valid brand name
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/car")
+                                .contentType("application/json")
+                                .content(objectMapper.writeValueAsString(validCar))
+                )
+                .andExpect(MockMvcResultMatchers.status().isCreated());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "1234", "Toyota1", "Chevrolet!", "@Ford", "Nissan$", "Mazda%"})
+    @DisplayName("Should return 400 bad request when creating a car with invalid brand name")
+    void testCreateCar_InvalidInputBrand(String brandName) throws Exception {
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
+        Car invalidCar = new Car(null, 4, "green", brandName); // Invalid brand name
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(
@@ -153,11 +209,27 @@ class CarControllerTest {
         assertEquals("Car not found", response.getBody());
     }
 
-    @Test
-    @DisplayName("Should return 400 bad request when updating a car with invalid number of wheels")
-    void testUpdateCar_InvalidInputNumberOfWheels() throws Exception {
+    @ParameterizedTest
+    @ValueSource(ints = {3, 4, 6, 8})
+    @DisplayName("Should update car with valid number of wheels")
+    void testUpdateCar_ValidInputNumberOfWheels(int numOfWheels) throws Exception {
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
-        Car invalidCar = new Car(null, -4, "green", "Toyota"); // Invalid number of wheels
+        Car validCar = new Car(null, numOfWheels, "green", "Toyota"); // Valid number of wheels
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(
+                        MockMvcRequestBuilders.put("/car/id/1")
+                                .contentType("application/json")
+                                .content(objectMapper.writeValueAsString(validCar))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-4, 0, 1, 2, 5, 7, 9, Integer.MAX_VALUE})
+    @DisplayName("Should return 400 bad request when updating a car with invalid number of wheels")
+    void testUpdateCar_InvalidInputNumberOfWheels(int numOfWheels) throws Exception {
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
+        Car invalidCar = new Car(null, numOfWheels, "green", "Toyota"); // Invalid number of wheels
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
                         MockMvcRequestBuilders.put("/car/id/1")
@@ -167,11 +239,27 @@ class CarControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
-    @Test
-    @DisplayName("Should return 400 bad request when updating a car with invalid color")
-    void testUpdateCar_InvalidInputColor() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"Green", "Red", "Blue", "Black", "White", "Silver", "Yellow"})
+    @DisplayName("Should update car with valid color")
+    void testUpdateCar_ValidInputColor(String color) throws Exception {
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
-        Car invalidCar = new Car(null, 4, "dosrje49!", "Toyota"); // Invalid color
+        Car validCar = new Car(null, 4, color , "Toyota"); // Valid color
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(
+                        MockMvcRequestBuilders.put("/car/id/1")
+                                .contentType("application/json")
+                                .content(objectMapper.writeValueAsString(validCar))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "1234", "red123", "blue!", "@green", "white$", "black%", "g-r-e-e-n"})
+    @DisplayName("Should return 400 bad request when updating a car with invalid color")
+    void testUpdateCar_InvalidInputColor(String color) throws Exception {
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
+        Car invalidCar = new Car(null, 4, color , "Toyota"); // Invalid color
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
                         MockMvcRequestBuilders.put("/car/id/1")
@@ -180,11 +268,28 @@ class CarControllerTest {
                 )
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
-    @Test
-    @DisplayName("Should return 400 bad request when updating a car with invalid number of wheels")
-    void testUpdateCar_InvalidInputBrand() throws Exception {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Toyota", "Chevrolet", "Ford", "Nissan", "Mazda", "Mercedes-Benz", "Land Rover"})
+    @DisplayName("Should update car with valid brand name")
+    void testUpdateCar_ValidInputBrand(String brandName) throws Exception {
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
-        Car invalidCar = new Car(null, 4, "green", "Toyota!"); // Invalid brand name
+        Car validCar = new Car(null, 4, "green", brandName); // Valid brand name
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(
+                        MockMvcRequestBuilders.put("/car/id/1")
+                                .contentType("application/json")
+                                .content(objectMapper.writeValueAsString(validCar))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "1234", "Toyota1", "Chevrolet!", "@Ford", "Nissan$", "Mazda%"})
+    @DisplayName("Should return 400 bad request when updating a car with invalid brand name")
+    void testUpdateCar_InvalidInputBrand(String brandName) throws Exception {
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(carController).build();
+        Car invalidCar = new Car(null, 4, "green", brandName); // Invalid brand name
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
                         MockMvcRequestBuilders.put("/car/id/1")
