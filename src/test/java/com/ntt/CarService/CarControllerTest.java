@@ -88,9 +88,11 @@ class CarControllerTest {
     @DisplayName("Should create a new car")
     void testCreateCar() {
         Car car = new Car(1L, 4, "White", "Audi");
-        ResponseEntity<?> response = carController.createCar(car);
+        when(carService.createCar(car)).thenReturn(car);
+
+        ResponseEntity<Car> response = carController.createCar(car);
         assertEquals(201, response.getStatusCodeValue());
-        assertEquals("Car created successfully", response.getBody());
+        assertEquals(car, response.getBody());
         verify(carService, times(1)).createCar(car);
     }
 
