@@ -57,10 +57,10 @@ public class CarController {
      * @return A {@link ResponseEntity} with a success message and HTTP status 201 Created.
      */
     @PostMapping("/car")
-    public ResponseEntity<?> createCar(@Valid @RequestBody Car car) {
+    public ResponseEntity<Car> createCar(@Valid @RequestBody Car car) {
         log.info("POST /car - Creating a new car");
-        carService.createCar(car);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Car created successfully");
+        Car createdCar = carService.createCar(car);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCar);
     }
 
     /**

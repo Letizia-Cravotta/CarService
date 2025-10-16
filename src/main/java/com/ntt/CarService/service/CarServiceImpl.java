@@ -40,9 +40,10 @@ public class CarServiceImpl implements CarService {
      * @param car The {@link Car} object to be created.
      */
     @Override
-    public void createCar(Car car) {
-        carRepository.save(car);
-        log.info("Car created successfully with ID: {}", car.getCarId());
+    public Car createCar(Car car) {
+        Car savedCar = carRepository.save(car);
+        log.info("Car created successfully with ID: {}", savedCar.getCarId());
+        return savedCar;
     }
 
     /**

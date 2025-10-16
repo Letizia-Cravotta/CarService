@@ -1,7 +1,13 @@
 version: '3.8'
+networks:
+  carservice_default:
+    driver: bridge
+
 services:
   # --- Frontend Service Definition ---
   frontend-service:
+    networks:
+      - carservice_default
     container_name: car-service-frontend
     build:
       context: ../CarServiceFrontend
@@ -11,6 +17,8 @@ services:
 
   # --- Backend Service Definition ---
   backend-service:
+    networks:
+    - carservice_default
     container_name: car-service-backend
     build: .
     depends_on:
@@ -24,6 +32,8 @@ services:
 
   # --- PostgreSQL Database Service Definition ---
   postgres:
+    networks:
+      - carservice_default
     image: postgres:16
     environment:
       POSTGRES_DB: car_db
