@@ -71,13 +71,14 @@ public class CarServiceImpl implements CarService {
      * @throws Exception if the car with the specified ID is not found.
      */
     @Override
-    public void updateCar(Long id, Car updatedCar) {
+    public Car updateCar(Long id, Car updatedCar) {
         Car existingCar = getCarById(id);
         existingCar.setNumberOfWheels(updatedCar.getNumberOfWheels());
         existingCar.setColor(updatedCar.getColor());
         existingCar.setBrand(updatedCar.getBrand());
-        carRepository.save(existingCar);
+        Car savedCar = carRepository.save(existingCar);
         log.info("Car with ID {} updated successfully", id);
+        return savedCar;
     }
 
     /**
@@ -87,12 +88,14 @@ public class CarServiceImpl implements CarService {
      * @throws Exception if the car with the specified ID is not found.
      */
     @Override
-    public void deleteCarById(Long id) {
+    public Car deleteCarById(Long id) {
         if (!carRepository.existsById(id)) {
             log.warn("Car with ID {} not found for deletion", id);
             throw new ResourceNotFoundException("Car", "carId", id);
         }
+        Car deletedCar = getCarById(id);
         carRepository.deleteById(id);
         log.info("Car with ID {} deleted successfully", id);
+        return deletedCar;
     }
 }

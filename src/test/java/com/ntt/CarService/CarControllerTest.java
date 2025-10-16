@@ -193,11 +193,11 @@ class CarControllerTest {
     @DisplayName("Should update car when ID exists")
     void testUpdateCar_Success() throws Exception {
         Car updatedCar = new Car(1L, 4, "Silver", "Mercedes");
-        doNothing().when(carService).updateCar(1L, updatedCar);
+        when(carService.updateCar(1L, updatedCar)).thenReturn(updatedCar);
 
-        ResponseEntity<String> response = carController.updateCar(1L, updatedCar);
+        ResponseEntity<?> response = carController.updateCar(1L, updatedCar);
         assertEquals(200, response.getStatusCodeValue());
-        assertEquals("Car updated successfully", response.getBody());
+        assertEquals(updatedCar, response.getBody());
     }
 
     @Test
@@ -206,7 +206,7 @@ class CarControllerTest {
         Car updatedCar = new Car(1L, 4, "Silver", "Mercedes");
         doThrow(new Exception("Car not found")).when(carService).updateCar(1L, updatedCar);
 
-        ResponseEntity<String> response = carController.updateCar(1L, updatedCar);
+        ResponseEntity<?> response = carController.updateCar(1L, updatedCar);
         assertEquals(404, response.getStatusCodeValue());
         assertEquals("Car not found", response.getBody());
     }
@@ -304,11 +304,12 @@ class CarControllerTest {
     @Test
     @DisplayName("Should delete car when ID exists")
     void testDeleteCar_Success() throws Exception {
-        doNothing().when(carService).deleteCarById(1L);
+        Car carToDelete = new Car(1L, 4, "Blue", "Ford");
+        when(carService.deleteCarById(1L)).thenReturn(carToDelete);
 
-        ResponseEntity<String> response = carController.deleteCar(1L);
+        ResponseEntity<?> response = carController.deleteCar(1L);
         assertEquals(200, response.getStatusCodeValue());
-        assertEquals("Car deleted successfully", response.getBody());
+        assertEquals(carToDelete, response.getBody());
     }
 
     @Test
@@ -316,7 +317,7 @@ class CarControllerTest {
     void testDeleteCar_NotFound() throws Exception {
         doThrow(new Exception("Car not found")).when(carService).deleteCarById(1L);
 
-        ResponseEntity<String> response = carController.deleteCar(1L);
+        ResponseEntity<?> response = carController.deleteCar(1L);
         assertEquals(404, response.getStatusCodeValue());
         assertEquals("Car not found", response.getBody());
     }
