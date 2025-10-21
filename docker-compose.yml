@@ -2,6 +2,8 @@ version: '3.8'
 networks:
   carservice_default:
     driver: bridge
+  monitoring:
+    driver: bridge
 
 services:
   # --- Frontend Service Definition ---
@@ -19,6 +21,7 @@ services:
   backend-service:
     networks:
     - carservice_default
+    - monitoring
     container_name: car-service-backend
     build: .
     depends_on:
@@ -34,6 +37,7 @@ services:
   postgres:
     networks:
       - carservice_default
+      - monitoring
     image: postgres:16
     environment:
       POSTGRES_DB: car_db
@@ -44,7 +48,40 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus/:/etc/prometheus/ # Mount the config file
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - monitoring # Add to the shared network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - '3000:3000' # Grafana's web interface port
+    volumes:
+      - grafana-data:/var/lib/grafana # Persistent storage for Grafana
+    networks:
+      - monitoring # Add to the shared network
+    depends_on:
+      - prometheus # Wait for Prometheus to be available
+
+  node-exporter: # Provides host metrics (CPU, RAM, disk)
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - '9100:9100'
+    networks:
+      - monitoring # Add to the shared network
+
 volumes:
+  grafana-data:
   pgdata:
 
 
