@@ -4,6 +4,9 @@ import com.ntt.CarService.exceptions.APIException;
 import com.ntt.CarService.exceptions.ResourceNotFoundException;
 import com.ntt.CarService.model.Car;
 import com.ntt.CarService.repository.CarRepository;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,8 +20,19 @@ import java.util.List;
 @Service
 @Slf4j
 public class CarServiceImpl implements CarService {
+
     @Autowired
     private CarRepository carRepository;
+
+    @Autowired
+    private MeterRegistry meterRegistry;
+
+    @PostConstruct
+    public void init() {
+        Gauge.builder("cars_database_total", carRepository, CarRepository::count)
+                .description("Total number of cars in the database")
+                .register(meterRegistry);
+    }
 
     /**
      * Retrieves a list of all cars.

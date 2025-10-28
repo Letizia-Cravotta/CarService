@@ -5,6 +5,8 @@ import com.ntt.CarService.exceptions.ResourceNotFoundException;
 import com.ntt.CarService.model.Car;
 import com.ntt.CarService.repository.CarRepository;
 import com.ntt.CarService.service.CarServiceImpl;
+import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.servlet.annotation.MultipartConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,9 @@ public class CarServiceTest {
 
     @Mock
     private CarRepository carRepository;
+
+    @Mock
+    private MeterRegistry meterRegistry;
 
     @InjectMocks
     private CarServiceImpl carService;
