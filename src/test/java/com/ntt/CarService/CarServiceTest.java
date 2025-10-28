@@ -118,10 +118,14 @@ public class CarServiceTest {
     @Test
     @DisplayName("Should delete car when ID exists")
     void testDeleteCarById_Success() {
+        Car carToDelete = new Car(1L, 4, "Black", "BMW");
+        when(carRepository.findById(1L)).thenReturn(Optional.of(carToDelete));
         when(carRepository.existsById(1L)).thenReturn(true);
 
-        carService.deleteCarById(1L);
+        Car deletedCar = carService.deleteCarById(1L);
 
+        assertNotNull(deletedCar);
+        assertEquals(1L, deletedCar.getCarId());
         verify(carRepository, times(1)).deleteById(1L);
     }
 

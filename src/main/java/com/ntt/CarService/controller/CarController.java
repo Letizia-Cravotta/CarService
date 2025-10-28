@@ -72,11 +72,11 @@ public class CarController {
      * or an error message if the car to update is not found (HTTP 404 Not Found).
      */
     @PutMapping("/car/id/{id}")
-    public ResponseEntity<String> updateCar(@PathVariable Long id, @Valid @RequestBody Car updatedCar) {
+    public ResponseEntity<?> updateCar(@PathVariable Long id, @Valid @RequestBody Car updatedCar) {
         log.info("PUT /car/id/{} - Updating car", id);
         try {
-            carService.updateCar(id, updatedCar);
-            return ResponseEntity.ok("Car updated successfully");
+            Car savedCar = carService.updateCar(id, updatedCar);
+            return ResponseEntity.ok(savedCar);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
@@ -91,11 +91,11 @@ public class CarController {
      * or an error message if the car to delete is not found (HTTP 404 Not Found).
      */
     @DeleteMapping("/car/id/{id}")
-    public ResponseEntity<String> deleteCar(@PathVariable Long id) {
+    public ResponseEntity<?> deleteCar(@PathVariable Long id) {
         log.info("DELETE /car/id/{} - Deleting car", id);
         try {
-            carService.deleteCarById(id);
-            return ResponseEntity.ok("Car deleted successfully");
+            Car deletedCar = carService.deleteCarById(id);
+            return ResponseEntity.ok(deletedCar);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

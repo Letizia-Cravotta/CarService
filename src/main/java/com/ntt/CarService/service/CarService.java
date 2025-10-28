@@ -11,7 +11,7 @@ public interface CarService {
 
     Car getCarById(Long id) throws Exception;
 
-    void updateCar(Long id, Car updatedCar) throws Exception;
+    Car updateCar(Long id, Car updatedCar) throws Exception;
 
-    void deleteCarById(Long id) throws Exception;
+    Car deleteCarById(Long id) throws Exception;
 }
