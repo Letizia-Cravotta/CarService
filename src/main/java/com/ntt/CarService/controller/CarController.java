@@ -15,6 +15,8 @@ import java.util.List;
  * Provides endpoints for creating, retrieving, updating, and deleting cars.
  */
 @RestController
+@CrossOrigin(origins = "*",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @Slf4j
 public class CarController {
 
