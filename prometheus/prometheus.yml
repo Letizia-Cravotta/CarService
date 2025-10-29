@@ -1,24 +1,32 @@
 # ./prometheus/prometheus.yml
 
 global:
-  scrape_interval: 15s # Scrape targets every 15 seconds
+  scrape_interval: 15s # By default, scrape every 15 seconds.
 
 scrape_configs:
-  # Job to scrape Prometheus itself
+  # Scrape Prometheus itself
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['localhost:9090'] # Prometheus is running on localhost *within its own pod*
 
-  # A job to scrape the node-exporter
-  - job_name: 'node_exporter'
-    static_configs:
-      - targets: ['node-exporter:9100']
+  # Scrape Node Exporter (using the Kubernetes Service we will create)
+  - job_name: 'node-exporter'
+    kubernetes_sd_configs:
+      - role: endpoints
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_name]
+        action: keep
+        regex: 'node-exporter' # This must match the name of the Service in Step 4
+      - source_labels: [__meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: 'metrics' # We will name the port 'metrics' in the Service
 
-  - job_name: 'backend-service'
+      # Scrape your Spring Boot backend
+  - job_name: 'spring-boot-app'
     metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: [ 'backend-service:8080' ]
-
-  - job_name: 'cadvisor'
-    static_configs:
-      - targets: [ 'cadvisor:8080' ]
+    kubernetes_sd_configs:
+      - role: endpoints
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_name]
+        action: keep
+        regex: 'my-spring-deployment'

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  labels:
+    app: node-exporter
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+    spec:
+      containers:
+        - name: node-exporter
+          image: prom/node-exporter:latest
+          ports:
+            - containerPort: 9100
+              name: metrics # We name this port for Prometheus to find
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-exporter # This is the name Prometheus will scrape
+  labels:
+    app: node-exporter
+spec:
+  type: ClusterIP # We only need this *inside* the cluster
+  ports:
+    - port: 9100
+      targetPort: 9100
+      name: metrics # This name matches the one in prometheus.yml
+  selector:
+    app: node-exporter # Selects the pods from the DaemonSet

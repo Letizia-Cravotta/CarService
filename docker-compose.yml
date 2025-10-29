@@ -87,19 +87,6 @@ services:
     networks:
       - monitoring # Add to the shared network
 
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    ports:
-      - "8081:8080" # Using 8081 to avoid conflict with your backend
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-    networks:
-      - monitoring # Add to the monitoring network
-
 volumes:
   grafana-data:
   pgdata:
