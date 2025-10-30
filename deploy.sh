@@ -48,7 +48,9 @@ if [ "$user_skip_builds" != "y" ]; then
 
   echo "Building frontend (car-service-frontend:latest)..."
   # Assumes frontend project is at '../CarServiceFrontend'
-  docker build -t car-service-frontend:latest ../CarServiceFrontend
+  cd ../CarServiceFrontend
+  docker build -t car-service-frontend:latest .
+  cd ../CarService
 
   echo "Docker images built."
 else
@@ -86,6 +88,7 @@ echo "[4/6] Applying all K8s manifests from 'minikube/' directory..."
 # This applies all .yaml files in the minikube/ directory
 # It handles Deployments, Services, PVCs, RBAC, etc.
 kubectl apply -f minikube/
+kubectl rollout restart deployment my-frontend-deployment
 echo "All manifests applied."
 
 

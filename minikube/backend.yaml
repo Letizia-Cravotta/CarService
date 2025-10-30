@@ -32,7 +32,7 @@ spec:
       spec:
         containers:
           - name: my-spring-app
-            image: my-spring-app:latest
+            image: car-service-backend:latest
             imagePullPolicy: Never
             ports:
               - containerPort: 8080
