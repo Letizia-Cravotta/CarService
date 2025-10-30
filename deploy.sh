@@ -18,11 +18,11 @@
 # --- Configuration ---
 # Set to 'true' to skip Docker builds (if no code has changed)
 SKIP_BUILDS=false
-
+PID_FILE=".k8s-pids" # File to store background process IDs
 # --- Script ---
 
 # Exit immediately if a command exits with a non-zero status.
-set -e
+func_deploy() {
 
 echo "--- Starting Full CarService Deployment ---"
 
@@ -112,30 +112,93 @@ echo "[6/6] Deployment complete! Your services are:"
 minikube service list
 
 echo "---"
-echo "You can now access your services at these URLs:"
-echo "NOTE: 'minikube service --url' does not work well in this environment."
-echo "Building URLs manually from NodePorts..."
-echo ""
+    echo "Your application is deployed."
+    echo "To connect from your Windows browser, run:"
+    echo ""
+    echo "   ./deploy.sh connect"
+    echo ""
+}
+# Function to start all port-forwards
+func_connect() {
+    # Stop any old forwards first
+    func_disconnect
 
-# Get the Minikube IP address
-MINIKUBE_IP=$(minikube ip)
+    echo "--- Starting background port-forwards ---"
 
-# --- Manually constructing URLs ---
-# These NodePorts come from your .yaml files (e.g., prometheus-k8s.yaml)
-#
-# HOW TO FIX: If a URL is wrong, open its .yaml file in 'minikube/',
-# find 'kind: Service', 'type: NodePort', and copy the 'nodePort:' value here.
-#
-GRAFANA_NODEPORT="30000"
-PROMETHEUS_NODEPORT="30090"
-# For the app services, we fetch the NodePort dynamically
-# This is safer because your YAMLs don't specify a port (so K8s assigns one)
-echo "Finding dynamically assigned NodePorts..."
-BACKEND_NODEPORT=$(kubectl get service my-spring-deployment -o=jsonpath='{.spec.ports[0].nodePort}')
-FRONTEND_NODEPORT=$(kubectl get service my-frontend-service -o=jsonpath='{.spec.ports[0].nodePort}')
+    # Start Frontend
+    echo "Forwarding Frontend (http://localhost:8080)..."
+    kubectl port-forward service/my-frontend-service 8080:80 &
+    echo $! >> $PID_FILE
 
-echo "Grafana:    http://$MINIKUBE_IP:$GRAFANA_NODEPORT"
-echo "Prometheus: http://$MINIKUBE_IP:$PROMETHEUS_NODEPORT"
-echo "Backend:    http://$MINIKUBE_IP:$BACKEND_NODEPORT"
-echo "Frontend:   http://$MINIKUBE_IP:$FRONTEND_NODEPORT"
-echo "--- Deployment Finished ---"
+    # Start Backend
+    echo "Forwarding Backend (http://localhost:8081)..."
+    kubectl port-forward service/my-spring-deployment 8081:8080 &
+    echo $! >> $PID_FILE
+
+    # Start Grafana (adjust service name if needed)
+    echo "Forwarding Grafana (http://localhost:3000)..."
+    kubectl port-forward service/grafana 3000:3000 &
+    echo $! >> $PID_FILE
+
+    # Start Prometheus (adjust service name if needed)
+    echo "Forwarding Prometheus (http://localhost:9090)..."
+    kubectl port-forward service/prometheus 9090:9090 &
+    echo $! >> $PID_FILE
+
+    echo "---"
+    echo "All forwards are running in the background."
+    echo "Access your apps on 'localhost' from your Windows browser."
+    echo "To stop them, run: ./deploy.sh disconnect"
+}
+
+# Function to stop all port-forwards
+func_disconnect() {
+    echo "--- Stopping background port-forwards ---"
+    if [ -f $PID_FILE ]; then
+        # Read each PID from the file and kill the process
+        while read pid; do
+            # Use kill -0 to check if process exists
+            if kill -0 $pid 2>/dev/null; then
+                echo "Stopping process $pid..."
+                kill $pid
+            else
+                echo "Process $pid already stopped."
+            fi
+        done < $PID_FILE
+
+        # Remove the PID file
+        rm $PID_FILE
+        echo "All forwards stopped."
+    else
+        echo "No PID file found. Nothing to stop."
+    fi
+}
+
+# --- Main Script Logic ---
+
+# Exit immediately if a command exits with a non-zero status.
+set -e
+
+# Get the command, default to 'deploy' if not provided
+COMMAND=$1
+if [ -z "$COMMAND" ]; then
+    COMMAND="deploy"
+fi
+
+# Run the correct function based on the command
+case $COMMAND in
+    deploy)
+        func_deploy
+        ;;
+    connect)
+        func_connect
+        ;;
+    disconnect)
+        func_disconnect
+        ;;
+    *)
+        echo "Error: Unknown command '$COMMAND'"
+        echo "Usage: $0 [deploy|connect|disconnect]"
+        exit 1
+        ;;
+esac
