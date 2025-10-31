@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # 1. CHANGE THIS: A unique name for the new service
+  name: my-second-backend-service
+  labels:
+    # 2. CHANGE THIS: A unique label for the new app
+    app: my-second-backend
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      # 3. CHANGE THIS (if needed): Must match your new app's containerPort
+      targetPort: 8081
+  selector:
+    # 4. CHANGE THIS: Must match the 'app' label below in the Deployment
+    app: my-second-backend
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # 5. CHANGE THIS: A unique name for the new deployment
+  name: my-second-backend-deployment
+  labels:
+    # 6. CHANGE THIS: Must match the 'app' label above
+    app: my-second-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # 7. CHANGE THIS: Must match the 'app' label above
+      app: my-second-backend
+  template:
+    metadata:
+      labels:
+        # 8. CHANGE THIS: Must match the 'app' label above
+        app: my-second-backend
+    spec:
+      containers:
+        # 9. CHANGE THIS: A name for your new container
+        - name: my-second-backend-app
+          # 10. IMPORTANT: Change this to your new backend's image
+          image: my-second-backend-image:latest
+          imagePullPolicy: Never
+          ports:
+            # 11. CHANGE THIS (if needed): The port your new app listens on
+            - containerPort: 8081
