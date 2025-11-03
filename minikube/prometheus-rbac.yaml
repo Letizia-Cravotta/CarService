@@ -1,9 +1,8 @@
-# prometheus-rbac.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: prometheus
-  namespace: default # Assumes you are in the default namespace
+  namespace: default
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

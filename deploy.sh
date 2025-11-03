@@ -4,24 +4,25 @@
 # application and its monitoring stack to Minikube.
 #
 # It will:
-# 1. Point the Docker CLI to Minikube's internal Docker daemon.
-# 2. Build the backend and frontend Docker images.
-# 3. Create all necessary K8s secrets and configmaps.
-# 4. Apply all K8s manifests (Deployments, Services, PVCs, RBAC) from the 'k8s/' directory.
-# 5. Wait for the database and backend to be fully deployed.
-# 6. List all Minikube services with their URLs.
+# 1. Check if Minikube is running, and start it if not.
+# 2. Point the Docker CLI to Minikube's internal Docker daemon.
+# 3. Build the backend and frontend Docker images.
+# 4. Create all necessary K8s secrets and configmaps.
+# 5. Apply all K8s manifests (Deployments, Services, PVCs, RBAC) from the 'minikube/' directory.
+# 6. Wait for the database and backend to be fully deployed.
+# 7. List all Minikube services with their URLs.
 #
 # Run from the 'CarService' backend project root:
 #   chmod +x deploy.sh
 #   ./deploy.sh
 
 # --- Configuration ---
-# Set to 'true' to skip Docker builds (if no code has changed)
 SKIP_BUILDS=false
 PID_FILE=".k8s-pids" # File to store background process IDs
+
+
 # --- Script ---
 
-# Exit immediately if a command exits with a non-zero status.
 func_deploy() {
 
 echo "--- Starting Full CarService Deployment ---"
@@ -36,18 +37,15 @@ echo "Docker environment set."
 echo "[2/6] Docker Build Step"
 read -p "Skip Docker builds (if no code has changed)? (y/n): " user_skip_builds
 
-# Convert to lowercase
 user_skip_builds=$(echo "$user_skip_builds" | tr '[:upper:]' '[:lower:]')
 
 if [ "$user_skip_builds" != "y" ]; then
   echo "Building local Docker images..."
 
   echo "Building backend (car-service-backend:latest)..."
-  # Assumes script is run from the backend root ('CarService')
   docker build -t car-service-backend:latest .
 
   echo "Building frontend (car-service-frontend:latest)..."
-  # Assumes frontend project is at '../CarServiceFrontend'
   cd ../CarServiceFrontend
   docker build -t car-service-frontend:latest .
   cd ../CarService
@@ -67,13 +65,11 @@ kubectl create secret generic grafana-smtp-secret \
   --dry-run=client -o yaml | kubectl apply -f -
 
 echo "Applying Prometheus ConfigMap (prometheus-config)..."
-# Assumes prometheus.yml is at './prometheus/prometheus.yml'
 kubectl create configmap prometheus-config \
   --from-file=./prometheus/prometheus.yml \
   --dry-run=client -o yaml | kubectl apply -f -
 
 echo "Applying Postgres secret (postgres-secret)..."
-# WARNING: Your 'k8s/postgres.yaml' MUST be configured to use this secret.
 kubectl create secret generic postgres-secret \
   --from-literal=POSTGRES_DB='car_db' \
   --from-literal=POSTGRES_USER='admin' \
@@ -85,8 +81,6 @@ echo "Prerequisites applied."
 
 # --- Step 4: Apply Core Deployment Manifests ---
 echo "[4/6] Applying all K8s manifests from 'minikube/' directory..."
-# This applies all .yaml files in the minikube/ directory
-# It handles Deployments, Services, PVCs, RBAC, etc.
 kubectl apply -f minikube/
 kubectl rollout restart deployment my-frontend-deployment
 echo "All manifests applied."
@@ -118,9 +112,9 @@ echo "---"
     echo "   ./deploy.sh connect"
     echo ""
 }
+
 # Function to start all port-forwards
 func_connect() {
-    # Stop any old forwards first
     func_disconnect
 
     echo "--- Starting background port-forwards ---"
@@ -155,9 +149,7 @@ func_connect() {
 func_disconnect() {
     echo "--- Stopping background port-forwards ---"
     if [ -f $PID_FILE ]; then
-        # Read each PID from the file and kill the process
         while read pid; do
-            # Use kill -0 to check if process exists
             if kill -0 $pid 2>/dev/null; then
                 echo "Stopping process $pid..."
                 kill $pid
@@ -166,7 +158,6 @@ func_disconnect() {
             fi
         done < $PID_FILE
 
-        # Remove the PID file
         rm $PID_FILE
         echo "All forwards stopped."
     else
@@ -179,13 +170,30 @@ func_disconnect() {
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-# Get the command, default to 'deploy' if not provided
+
+# --- Minikube Status Check ---
+echo "Checking Minikube status..."
+# Get the status of the 'host' component for the 'minikube' profile
+# If this command fails (minikube not installed, profile not found), 'set -e' will exit the script.
+MINIKUBE_STATUS=$(minikube -p minikube status -f '{{.Host}}' || echo "Stopped")
+
+if [ "$MINIKUBE_STATUS" != "Running" ]; then
+    echo "Minikube is not running (Current status: $MINIKUBE_STATUS). Starting Minikube..."
+    minikube -p minikube start
+    echo "Minikube started."
+else
+    echo "Minikube is already running."
+fi
+echo "---"
+
+
+# --- Command Handling ---
+
 COMMAND=$1
 if [ -z "$COMMAND" ]; then
     COMMAND="deploy"
 fi
 
-# Run the correct function based on the command
 case $COMMAND in
     deploy)
         func_deploy

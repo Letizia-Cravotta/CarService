@@ -1,35 +1,33 @@
-# frontend-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-frontend-deployment
+  name: frontend-deployment
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: my-frontend
+      app: frontend
   template:
     metadata:
       labels:
-        app: my-frontend
+        app: frontend
     spec:
       containers:
-        - name: my-frontend-app
+        - name: frontend-app
           image: car-service-frontend:latest
-          imagePullPolicy: Never # <-- Use the local image
+          imagePullPolicy: Never
           ports:
-            - containerPort: 80 # The port Nginx runs on
+            - containerPort: 80
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-frontend-service
+  name: frontend-service
 spec:
-  type: NodePort # <-- We will access this from our browser
+  type: NodePort
   ports:
-    - port: 80       # Service's internal port
-      targetPort: 80 # Pod's port (Nginx)
+    - port: 80
+      targetPort: 80
   selector:
-    app: my-frontend
+    app: frontend
