@@ -82,7 +82,7 @@ echo "Prerequisites applied."
 # --- Step 4: Apply Core Deployment Manifests ---
 echo "[4/6] Applying all K8s manifests from 'minikube/' directory..."
 kubectl apply -f minikube/
-kubectl rollout restart deployment my-frontend-deployment
+kubectl rollout restart deployment frontend-deployment
 echo "All manifests applied."
 
 
@@ -90,7 +90,7 @@ echo "All manifests applied."
 echo "[5/6] Waiting for key deployments to be ready..."
 
 POSTGRES_DEPLOYMENT_NAME="postgres-deployment"
-BACKEND_DEPLOYMENT_NAME="my-spring-deployment"
+BACKEND_DEPLOYMENT_NAME="backend-deployment"
 
 echo "Waiting for Postgres ($POSTGRES_DEPLOYMENT_NAME)..."
 kubectl rollout status deployment/$POSTGRES_DEPLOYMENT_NAME --timeout=3m
