@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: second-backend-service
+  labels:
+    app: second-backend
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8081
+  selector:
+    app: second-backend
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: second-backend-deployment
+  labels:
+    app: second-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: second-backend
+  template:
+    metadata:
+      labels:
+        app: second-backend
+    spec:
+      containers:
+        - name: second-backend-app
+          image: car-service-second-backend-image:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8081

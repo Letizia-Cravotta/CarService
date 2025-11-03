@@ -18,8 +18,7 @@
 
 # --- Configuration ---
 SKIP_BUILDS=false
-PID_FILE=".k8s-pids" # File to store background process IDs
-
+PID_FILE=".k8s-pids"
 
 # --- Script ---
 
@@ -42,8 +41,13 @@ user_skip_builds=$(echo "$user_skip_builds" | tr '[:upper:]' '[:lower:]')
 if [ "$user_skip_builds" != "y" ]; then
   echo "Building local Docker images..."
 
-  echo "Building backend (car-service-backend:latest)..."
+  echo "Building backend 1 (car-service-backend:latest)..."
   docker build -t car-service-backend:latest .
+
+  echo "Building backend 2 (car-service-second-backend-image:latest)..."
+  cd ../otherBackend
+  docker build -t car-service-second-backend-image:latest .
+  cd ../CarService
 
   echo "Building frontend (car-service-frontend:latest)..."
   cd ../CarServiceFrontend
@@ -91,12 +95,16 @@ echo "[5/6] Waiting for key deployments to be ready..."
 
 POSTGRES_DEPLOYMENT_NAME="postgres-deployment"
 BACKEND_DEPLOYMENT_NAME="backend-deployment"
+SECOND_BACKEND_DEPLOYMENT_NAME="second-backend-deployment"
 
 echo "Waiting for Postgres ($POSTGRES_DEPLOYMENT_NAME)..."
 kubectl rollout status deployment/$POSTGRES_DEPLOYMENT_NAME --timeout=3m
 
 echo "Waiting for Backend ($BACKEND_DEPLOYMENT_NAME)..."
 kubectl rollout status deployment/$BACKEND_DEPLOYMENT_NAME --timeout=3m
+
+echo "Waiting for Backend 2($SECOND_BACKEND_DEPLOYMENT_NAME)..."
+kubectl rollout status deployment/$SECOND_BACKEND_DEPLOYMENT_NAME --timeout=3m
 
 echo "Deployments are ready."
 
@@ -128,6 +136,11 @@ func_connect() {
     echo "Forwarding Backend (http://localhost:8081)..."
     kubectl port-forward service/my-spring-deployment 8081:8080 &
     echo $! >> $PID_FILE
+
+    # Start Backend 2
+      echo "Forwarding Backend 2(http://localhost:8082)..."
+      kubectl port-forward service/my-second-backend-service 8082:8080 &
+      echo $! >> $PID_FILE
 
     # Start Grafana (adjust service name if needed)
     echo "Forwarding Grafana (http://localhost:3000)..."
