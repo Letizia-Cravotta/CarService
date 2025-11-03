@@ -46,9 +46,9 @@ if [ "$user_skip_builds" != "y" ]; then
   # Assumes script is run from the backend root ('CarService')
   docker build -t car-service-backend:latest .
 
-  echo "Building backend 2 (my-second-backend-image:latest)..."
+  echo "Building backend 2 (car-service-second-backend-image:latest)..."
   cd ../otherBackend
-  docker build -t my-second-backend-image:latest .
+  docker build -t car-service-second-backend-image:latest .
   cd ../CarService
 
   echo "Building frontend (car-service-frontend:latest)..."
@@ -102,7 +102,7 @@ echo "[5/6] Waiting for key deployments to be ready..."
 
 POSTGRES_DEPLOYMENT_NAME="postgres-deployment"
 BACKEND_DEPLOYMENT_NAME="my-spring-deployment"
-SECOND_BACKEND_DEPLOYMENT_NAME="my-second-backend-deployment"
+SECOND_BACKEND_DEPLOYMENT_NAME="second-backend-deployment"
 
 echo "Waiting for Postgres ($POSTGRES_DEPLOYMENT_NAME)..."
 kubectl rollout status deployment/$POSTGRES_DEPLOYMENT_NAME --timeout=3m
