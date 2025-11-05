@@ -90,7 +90,7 @@ echo "All manifests applied."
 echo "[5/6] Waiting for key deployments to be ready..."
 
 POSTGRES_DEPLOYMENT_NAME="postgres-deployment"
-BACKEND_DEPLOYMENT_NAME="backend-deployment"
+BACKEND_DEPLOYMENT_NAME="car-service-backend-deployment"
 
 echo "Waiting for Postgres ($POSTGRES_DEPLOYMENT_NAME)..."
 kubectl rollout status deployment/$POSTGRES_DEPLOYMENT_NAME --timeout=3m
@@ -126,7 +126,7 @@ func_connect() {
 
     # Start Backend
     echo "Forwarding Backend (http://localhost:8081)..."
-    kubectl port-forward service/my-spring-deployment 8081:8080 &
+    kubectl port-forward service/car-service-backend-service 8081:8080 &
     echo $! >> $PID_FILE
 
     # Start Grafana (adjust service name if needed)
