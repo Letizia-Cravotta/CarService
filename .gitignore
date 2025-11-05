@@ -33,3 +33,4 @@ build/
 .vscode/
 
 .k8s-pids
+my-app.log
