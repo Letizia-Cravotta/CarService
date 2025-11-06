@@ -104,7 +104,7 @@ class CarControllerTest {
         Car validCar = new Car(null, numberOfWheels, "green", "Toyota"); // Valid number of wheels
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/car")
+                        MockMvcRequestBuilders.post("/api/car")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(validCar))
                 )
@@ -120,7 +120,7 @@ class CarControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/car")
+                        MockMvcRequestBuilders.post("/api/car")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
@@ -135,7 +135,7 @@ class CarControllerTest {
         Car validCar = new Car(null, 4, color, "Toyota"); // Valid color
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/car")
+                        MockMvcRequestBuilders.post("/api/car")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(validCar))
                 )
@@ -151,7 +151,7 @@ class CarControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/car")
+                        MockMvcRequestBuilders.post("/api/car")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
@@ -166,7 +166,7 @@ class CarControllerTest {
         Car validCar = new Car(null, 4, "green", brandName); // Valid brand name
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/car")
+                        MockMvcRequestBuilders.post("/api/car")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(validCar))
                 )
@@ -182,7 +182,7 @@ class CarControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/car")
+                        MockMvcRequestBuilders.post("/api/car")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
@@ -219,7 +219,7 @@ class CarControllerTest {
         Car validCar = new Car(null, numOfWheels, "green", "Toyota"); // Valid number of wheels
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        MockMvcRequestBuilders.put("/car/id/1")
+                        MockMvcRequestBuilders.put("/api/car/id/1")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(validCar))
                 )
@@ -234,7 +234,7 @@ class CarControllerTest {
         Car invalidCar = new Car(null, numOfWheels, "green", "Toyota"); // Invalid number of wheels
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        MockMvcRequestBuilders.put("/car/id/1")
+                        MockMvcRequestBuilders.put("/api/car/id/1")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
@@ -249,7 +249,7 @@ class CarControllerTest {
         Car validCar = new Car(null, 4, color , "Toyota"); // Valid color
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        MockMvcRequestBuilders.put("/car/id/1")
+                        MockMvcRequestBuilders.put("/api/car/id/1")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(validCar))
                 )
@@ -264,7 +264,7 @@ class CarControllerTest {
         Car invalidCar = new Car(null, 4, color , "Toyota"); // Invalid color
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        MockMvcRequestBuilders.put("/car/id/1")
+                        MockMvcRequestBuilders.put("/api/car/id/1")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )
@@ -279,7 +279,7 @@ class CarControllerTest {
         Car validCar = new Car(null, 4, "green", brandName); // Valid brand name
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        MockMvcRequestBuilders.put("/car/id/1")
+                        MockMvcRequestBuilders.put("/api/car/id/1")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(validCar))
                 )
@@ -294,7 +294,7 @@ class CarControllerTest {
         Car invalidCar = new Car(null, 4, "green", brandName); // Invalid brand name
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(
-                        MockMvcRequestBuilders.put("/car/id/1")
+                        MockMvcRequestBuilders.put("/api/car/id/1")
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(invalidCar))
                 )

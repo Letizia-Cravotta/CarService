@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: car-service-backend-service
+  labels:
+    app: car-service-backend
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: car-service-backend
+
+---
+
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: car-service-backend-deployment
+    labels:
+      app: car-service-backend
+  spec:
+    selector:
+      matchLabels:
+        app: car-service-backend
+    template:
+      metadata:
+        labels:
+          app: car-service-backend
+      spec:
+        containers:
+          - name: car-service-backend-app
+            image: car-service-backend:latest
+            imagePullPolicy: Never
+            ports:
+              - containerPort: 8080
+
