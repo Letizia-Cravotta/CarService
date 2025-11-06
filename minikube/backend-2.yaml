@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: corporation-info-service
+  labels:
+    app: corporation-info-service
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8081
+  selector:
+    app: corporation-info-service
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: corporation-info-service-deployment
+  labels:
+    app: corporation-info-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: corporation-info-service
+  template:
+    metadata:
+      labels:
+        app: corporation-info-service
+    spec:
+      containers:
+        - name: corporation-info-app
+          image: corporation-info-service-image:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8081
