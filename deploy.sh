@@ -44,9 +44,9 @@ if [ "$user_skip_builds" != "y" ]; then
   echo "Building backend 1 (car-service-backend:latest)..."
   docker build -t car-service-backend:latest .
 
-  echo "Building backend 2 (car-service-second-backend-image:latest)..."
+  echo "Building backend 2 (corporation-info-service-image:latest)..."
   cd ../otherBackend
-  docker build -t car-service-second-backend-image:latest .
+  docker build -t corporation-info-service-image:latest .
   cd ../CarService
 
   echo "Building frontend (car-service-frontend:latest)..."
@@ -98,8 +98,8 @@ echo "All manifests applied and deployments restarted."
 echo "[5/6] Waiting for key deployments to be ready..."
 
 POSTGRES_DEPLOYMENT_NAME="postgres-deployment"
-BACKEND_DEPLOYMENT_NAME="backend-deployment"
-SECOND_BACKEND_DEPLOYMENT_NAME="second-backend-deployment"
+SECOND_BACKEND_DEPLOYMENT_NAME="corporation-info-service-deployment"
+BACKEND_DEPLOYMENT_NAME="car-service-backend-deployment"
 
 echo "Waiting for Postgres ($POSTGRES_DEPLOYMENT_NAME)..."
 kubectl rollout status deployment/$POSTGRES_DEPLOYMENT_NAME --timeout=3m
@@ -138,7 +138,12 @@ func_connect() {
 
     # Start Backend
     echo "Forwarding Backend (http://localhost:8081)..."
-    kubectl port-forward service/backend-service 8081:8080 &
+    kubectl port-forward service/car-service-backend-service 8081:8080 &
+    echo $! >> $PID_FILE
+
+    # Start Backend 2
+    echo "Forwarding Backend 2(http://localhost:8082)..."
+    kubectl port-forward service/corporation-info-service 8082:8080 &
     echo $! >> $PID_FILE
 
     # Start Grafana (adjust service name if needed)
