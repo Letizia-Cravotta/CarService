@@ -18,8 +18,7 @@
 
 # --- Configuration ---
 SKIP_BUILDS=false
-PID_FILE=".k8s-pids" # File to store background process IDs
-
+PID_FILE=".k8s-pids"
 
 # --- Script ---
 
@@ -43,7 +42,6 @@ if [ "$user_skip_builds" != "y" ]; then
   echo "Building local Docker images..."
 
   echo "Building backend 1 (car-service-backend:latest)..."
-  # Assumes script is run from the backend root ('CarService')
   docker build -t car-service-backend:latest .
 
   echo "Building backend 2 (corporation-info-service-image:latest)..."
@@ -88,9 +86,13 @@ echo "Prerequisites applied."
 # --- Step 4: Apply Core Deployment Manifests ---
 echo "[4/6] Applying all K8s manifests from 'minikube/' directory..."
 kubectl apply -f minikube/
-kubectl rollout restart deployment frontend-deployment
-echo "All manifests applied."
 
+echo "Restarting deployments to apply new images..."
+kubectl rollout restart deployment backend-deployment
+kubectl rollout restart deployment second-backend-deployment
+kubectl rollout restart deployment frontend-deployment
+
+echo "All manifests applied and deployments restarted."
 
 # --- Step 5: Wait for Critical Deployments ---
 echo "[5/6] Waiting for key deployments to be ready..."
@@ -131,7 +133,7 @@ func_connect() {
 
     # Start Frontend
     echo "Forwarding Frontend (http://localhost:8080)..."
-    kubectl port-forward service/my-frontend-service 8080:80 &
+    kubectl port-forward service/frontend-service 8080:80 &
     echo $! >> $PID_FILE
 
     # Start Backend
@@ -140,9 +142,9 @@ func_connect() {
     echo $! >> $PID_FILE
 
     # Start Backend 2
-      echo "Forwarding Backend 2(http://localhost:8082)..."
-      kubectl port-forward service/corporation-info-service 8082:8080 &
-      echo $! >> $PID_FILE
+    echo "Forwarding Backend 2(http://localhost:8082)..."
+    kubectl port-forward service/corporation-info-service 8082:8080 &
+    echo $! >> $PID_FILE
 
     # Start Grafana (adjust service name if needed)
     echo "Forwarding Grafana (http://localhost:3000)..."
@@ -152,6 +154,15 @@ func_connect() {
     # Start Prometheus (adjust service name if needed)
     echo "Forwarding Prometheus (http://localhost:9090)..."
     kubectl port-forward service/prometheus 9090:9090 &
+    echo $! >> $PID_FILE
+
+    echo "Forwarding PostgreSQL (localhost:5432)..."
+    kubectl port-forward service/postgres-db-service 5432:5432 &
+    echo $! >> $PID_FILE
+
+    # Start Backend 2
+    echo "Forwarding Backend 2(http://localhost:8082)..."
+    kubectl port-forward service/second-backend-service 8082:8080 &
     echo $! >> $PID_FILE
 
     echo "---"

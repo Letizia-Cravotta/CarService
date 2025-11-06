@@ -39,6 +39,7 @@ public class CarController {
     @GetMapping("/car")
     public List<Car> getAllCars() {
         log.info("GET /car - Retrieving all cars");
+        log.info("Test");
         return carService.getAllCars();
     }
 
