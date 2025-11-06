@@ -42,8 +42,14 @@ user_skip_builds=$(echo "$user_skip_builds" | tr '[:upper:]' '[:lower:]')
 if [ "$user_skip_builds" != "y" ]; then
   echo "Building local Docker images..."
 
-  echo "Building backend (car-service-backend:latest)..."
+  echo "Building backend 1 (car-service-backend:latest)..."
+  # Assumes script is run from the backend root ('CarService')
   docker build -t car-service-backend:latest .
+
+  echo "Building backend 2 (corporation-info-service-image:latest)..."
+  cd ../otherBackend
+  docker build -t corporation-info-service-image:latest .
+  cd ../CarService
 
   echo "Building frontend (car-service-frontend:latest)..."
   cd ../CarServiceFrontend
@@ -90,6 +96,7 @@ echo "All manifests applied."
 echo "[5/6] Waiting for key deployments to be ready..."
 
 POSTGRES_DEPLOYMENT_NAME="postgres-deployment"
+SECOND_BACKEND_DEPLOYMENT_NAME="corporation-info-service-deployment"
 BACKEND_DEPLOYMENT_NAME="car-service-backend-deployment"
 
 echo "Waiting for Postgres ($POSTGRES_DEPLOYMENT_NAME)..."
@@ -97,6 +104,9 @@ kubectl rollout status deployment/$POSTGRES_DEPLOYMENT_NAME --timeout=3m
 
 echo "Waiting for Backend ($BACKEND_DEPLOYMENT_NAME)..."
 kubectl rollout status deployment/$BACKEND_DEPLOYMENT_NAME --timeout=3m
+
+echo "Waiting for Backend 2($SECOND_BACKEND_DEPLOYMENT_NAME)..."
+kubectl rollout status deployment/$SECOND_BACKEND_DEPLOYMENT_NAME --timeout=3m
 
 echo "Deployments are ready."
 
@@ -128,6 +138,11 @@ func_connect() {
     echo "Forwarding Backend (http://localhost:8081)..."
     kubectl port-forward service/car-service-backend-service 8081:8080 &
     echo $! >> $PID_FILE
+
+    # Start Backend 2
+      echo "Forwarding Backend 2(http://localhost:8082)..."
+      kubectl port-forward service/corporation-info-service 8082:8080 &
+      echo $! >> $PID_FILE
 
     # Start Grafana (adjust service name if needed)
     echo "Forwarding Grafana (http://localhost:3000)..."
