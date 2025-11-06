@@ -1,22 +1,15 @@
-# postgres-db.yaml
-
-# 1. This is the PersistentVolumeClaim (the K8s version of your "pgdata" volume)
-# It requests 1GB of storage from Minikube.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
 spec:
   accessModes:
-    - ReadWriteOnce # This volume can be mounted by one pod at a time
+    - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi # You can change this size if needed
+      storage: 1Gi
 
 ---
-
-# 2. This is the Service (the stable network hostname "postgres-db-service")
-# Your Spring app will use this name to find the database.
 apiVersion: v1
 kind: Service
 metadata:
@@ -25,11 +18,9 @@ spec:
   ports:
     - port: 5432
   selector:
-    app: postgres # Connects this service to the pods labeled "app: postgres"
+    app: postgres
 
 ---
-
-# 3. This is the Deployment (runs the Postgres container)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -42,28 +33,33 @@ spec:
   template:
     metadata:
       labels:
-        app: postgres # Must match the service's selector
+        app: postgres
     spec:
       containers:
         - name: postgres
-          image: postgres:16 # <-- UPDATED from your compose file
+          image: postgres:16
           ports:
             - containerPort: 5432
           env:
-            # --- UPDATED from your compose file ---
             - name: POSTGRES_DB
-              value: "car_db"
+              valueFrom:
+                secretKeyRef:
+                  key: POSTGRES_DB
+                  name: postgres-secret
             - name: POSTGRES_USER
-              value: "admin"
+              valueFrom:
+                secretKeyRef:
+                  key: POSTGRES_USER
+                  name: postgres-secret
             - name: POSTGRES_PASSWORD
-              value: "password" # <-- See security note below
-            # --------------------------------------
+              valueFrom:
+                secretKeyRef:
+                  key: POSTGRES_PASSWORD
+                  name: postgres-secret
           volumeMounts:
-            # This mounts the volume into the container
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
       volumes:
-        # This links the pod to the PersistentVolumeClaim
         - name: postgres-storage
           persistentVolumeClaim:
             claimName: postgres-pvc

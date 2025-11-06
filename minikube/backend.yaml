@@ -1,50 +1,38 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-spring-deployment
+  name: car-service-backend-service
   labels:
-    app: my-spring-deployment
+    app: car-service-backend
 spec:
   type: NodePort
   ports:
     - port: 8080
       targetPort: 8080
   selector:
-    app: my-spring-deployment
+    app: car-service-backend
 
 ---
 
   apiVersion: apps/v1
   kind: Deployment
   metadata:
-    name: my-spring-deployment
+    name: car-service-backend-deployment
     labels:
-      app: my-spring-deployment
+      app: car-service-backend
   spec:
-    replicas: 1
     selector:
       matchLabels:
-        app: my-spring-deployment
+        app: car-service-backend
     template:
       metadata:
         labels:
-          app: my-spring-deployment
+          app: car-service-backend
       spec:
         containers:
-          - name: my-spring-app
+          - name: car-service-backend-app
             image: car-service-backend:latest
             imagePullPolicy: Never
             ports:
               - containerPort: 8080
 
-# ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=my-spring-app:latest
-# kubectl rollout restart deployment my-spring-deployment
-# minikube service my-spring-deployment
-
-
-# kubectl port-forward service/my-spring-deployment 8080:8080
-
-#Frontend:
-# docker build -t my-frontend-app:latest .
-# kubectl rollout restart deployment my-frontend-deployment
-# minikube service my-frontend-deployment
