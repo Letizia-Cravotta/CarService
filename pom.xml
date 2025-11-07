@@ -120,6 +120,19 @@
             </plugin>
 
             <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>11.15.0</version>
+                <configuration>
+                    <url>jdbc:postgresql://localhost:5432/car_db</url>
+                    <user>admin</user>
+                    <password>password</password>
+                    <schemas>
+                        <schema>car_db</schema>
+                    </schemas>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>

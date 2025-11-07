@@ -88,9 +88,10 @@ echo "[4/6] Applying all K8s manifests from 'minikube/' directory..."
 kubectl apply -f minikube/
 
 echo "Restarting deployments to apply new images..."
-kubectl rollout restart deployment backend-deployment
-kubectl rollout restart deployment second-backend-deployment
+kubectl rollout restart deployment car-service-backend-deployment
+kubectl rollout restart deployment corporation-info-service-deployment
 kubectl rollout restart deployment frontend-deployment
+kubectl rollout restart deployment prometheus
 
 echo "All manifests applied and deployments restarted."
 
@@ -158,11 +159,6 @@ func_connect() {
 
     echo "Forwarding PostgreSQL (localhost:5432)..."
     kubectl port-forward service/postgres-db-service 5432:5432 &
-    echo $! >> $PID_FILE
-
-    # Start Backend 2
-    echo "Forwarding Backend 2(http://localhost:8082)..."
-    kubectl port-forward service/second-backend-service 8082:8080 &
     echo $! >> $PID_FILE
 
     echo "---"
