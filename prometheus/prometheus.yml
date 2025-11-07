@@ -21,12 +21,15 @@ scrape_configs:
         action: keep
         regex: 'metrics' # We will name the port 'metrics' in the Service
 
-      # Scrape your Spring Boot backend
-  - job_name: 'spring-boot-app'
+  # Scrape your Spring Boot backend
+  - job_name: 'car-service-backend'
     metrics_path: '/actuator/prometheus'
     kubernetes_sd_configs:
       - role: endpoints
     relabel_configs:
       - source_labels: [__meta_kubernetes_service_name]
         action: keep
-        regex: 'my-spring-deployment'
+        regex: 'car-service-backend-service'
+      - source_labels: [__meta_kubernetes_endpoint_port_name] # Add this block
+        action: keep
+        regex: 'http'

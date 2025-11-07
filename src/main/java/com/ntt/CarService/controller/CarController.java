@@ -31,6 +31,12 @@ public class CarController {
     @Autowired
     private CarService carService;
 
+    @GetMapping("/greet")
+    public String greet() {
+        log.info("GET /greet - Greeting endpoint called");
+        return "Hello from Car Service!";
+    }
+
     /**
      * Retrieves a list of all cars.
      *
