@@ -8,9 +8,11 @@
 # 2. Point the Docker CLI to Minikube's internal Docker daemon.
 # 3. Build the backend and frontend Docker images.
 # 4. Create all necessary K8s secrets and configmaps.
-# 5. Apply all K8s manifests (Deployments, Services, PVCs, RBAC) from the 'minikube/' directory.
-# 6. Wait for the database and backend to be fully deployed.
-# 7. List all Minikube services with their URLs.
+# 5. Deploy the Kafka cluster to the 'kafka' namespace.
+# 6. Apply all K8s manifests (Deployments, Services, etc.) from 'minikube/'.
+# 7. Wait for Postgres AND Kafka to be ready.
+# 8. Wait for the backend to be fully deployed.
+# 9. List all Minikube services with their URLs.
 #
 # Run from the 'CarService' backend project root:
 #   chmod +x deploy.sh
@@ -27,13 +29,13 @@ func_deploy() {
 echo "--- Starting Full CarService Deployment ---"
 
 # --- Step 1: Set Minikube Docker Environment ---
-echo "[1/6] Pointing Docker CLI to Minikube's Docker daemon..."
+echo "[1/7] Pointing Docker CLI to Minikube's Docker daemon..."
 eval $(minikube -p minikube docker-env)
 echo "Docker environment set."
 
 
 # --- Step 2: Build Docker Images ---
-echo "[2/6] Docker Build Step"
+echo "[2/7] Docker Build Step"
 read -p "Skip Docker builds (if no code has changed)? (y/n): " user_skip_builds
 
 user_skip_builds=$(echo "$user_skip_builds" | tr '[:upper:]' '[:lower:]')
@@ -56,12 +58,12 @@ if [ "$user_skip_builds" != "y" ]; then
 
   echo "Docker images built."
 else
-  echo "[2/6] Skipping Docker builds as requested."
+  echo "[2/7] Skipping Docker builds as requested."
 fi
 
 
 # --- Step 3: Apply Prerequisite K8s Resources ---
-echo "[3/6] Applying K8s Secrets and ConfigMaps..."
+echo "[3/7] Applying K8s Secrets and ConfigMaps..."
 
 echo "Applying Grafana SMTP secret (grafana-smtp-secret)..."
 kubectl create secret generic grafana-smtp-secret \
@@ -82,9 +84,17 @@ kubectl create secret generic postgres-secret \
 
 echo "Prerequisites applied."
 
+### KAFKA ###
+# --- Step 4: Apply Kafka Cluster Manifests ---
+echo "[4/7] Applying Kafka Cluster Manifests..."
+echo "Applying Kafka cluster (from minikube/kafka-cluster.yaml)..."
+# This now points to the file inside the minikube/ directory
+kubectl apply -f minikube/kafka-cluster.yaml
+echo "Kafka manifests applied."
+### KAFKA ###
 
-# --- Step 4: Apply Core Deployment Manifests ---
-echo "[4/6] Applying all K8s manifests from 'minikube/' directory..."
+# --- Step 5: Apply Core Deployment Manifests ---
+echo "[5/7] Applying all K8s manifests from 'minikube/' directory..."
 kubectl apply -f minikube/
 
 echo "Restarting deployments to apply new images..."
@@ -95,12 +105,16 @@ kubectl rollout restart deployment prometheus
 
 echo "All manifests applied and deployments restarted."
 
-# --- Step 5: Wait for Critical Deployments ---
-echo "[5/6] Waiting for key deployments to be ready..."
+# --- Step 6: Wait for Critical Deployments ---
+echo "[6/7] Waiting for key deployments to be ready..."
 
 POSTGRES_DEPLOYMENT_NAME="postgres-deployment"
 SECOND_BACKEND_DEPLOYMENT_NAME="corporation-info-service-deployment"
 BACKEND_DEPLOYMENT_NAME="car-service-backend-deployment"
+
+echo "Waiting for Kafka (my-cluster) to be ready..."
+kubectl wait kafka/my-cluster --for=condition=Ready --timeout=5m -n kafka
+echo "Kafka is ready."
 
 echo "Waiting for Postgres ($POSTGRES_DEPLOYMENT_NAME)..."
 kubectl rollout status deployment/$POSTGRES_DEPLOYMENT_NAME --timeout=3m
@@ -114,8 +128,8 @@ kubectl rollout status deployment/$SECOND_BACKEND_DEPLOYMENT_NAME --timeout=3m
 echo "Deployments are ready."
 
 
-# --- Step 6: Show Results ---
-echo "[6/6] Deployment complete! Your services are:"
+# --- Step 7: Show Results ---
+echo "[7/7] Deployment complete! Your services are:"
 minikube service list
 
 echo "---"
@@ -147,18 +161,28 @@ func_connect() {
     kubectl port-forward service/corporation-info-service 8082:8080 &
     echo $! >> $PID_FILE
 
-    # Start Grafana (adjust service name if needed)
+    # Start Grafana
     echo "Forwarding Grafana (http://localhost:3000)..."
     kubectl port-forward service/grafana 3000:3000 &
     echo $! >> $PID_FILE
 
-    # Start Prometheus (adjust service name if needed)
+    # Start Prometheus
     echo "Forwarding Prometheus (http://localhost:9090)..."
     kubectl port-forward service/prometheus 9090:9090 &
     echo $! >> $PID_FILE
 
+    # Start PostgreSQL
     echo "Forwarding PostgreSQL (localhost:5432)..."
     kubectl port-forward service/postgres-db-service 5432:5432 &
+    echo $! >> $PID_FILE
+
+    # Start Kafka
+    echo "Forwarding Kafka (localhost:9092)..."
+    kubectl port-forward service/my-cluster-kafka-bootstrap -n kafka 9092:9092 &
+    echo $! >> $PID_FILE
+
+    echo "Forwarding Kafka UI (http://localhost:8090)..."
+    kubectl port-forward service/kafka-ui-service -n kafka 8090:8080 &
     echo $! >> $PID_FILE
 
     echo "---"

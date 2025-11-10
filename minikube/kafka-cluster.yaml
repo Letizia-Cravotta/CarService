@@ -1,0 +1,40 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: my-cluster
+  namespace: kafka
+spec:
+  kafka:
+    version: 4.1.0
+    listeners:
+      # Listener for internal cluster communication
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      # Listener for external communication from your local machine
+      - name: external
+        port: 9094
+        type: nodeport
+        tls: false
+    config:
+      auto.create.topics.enable: 'true'
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: my-pool
+  namespace: kafka
+  labels:
+    # This label is the "glue" that links this pool to the 'my-cluster' Kafka
+    strimzi.io/cluster: my-cluster
+spec:
+  replicas: 1
+  roles:
+    - broker
+    - controller
+  storage:
+    type: ephemeral
